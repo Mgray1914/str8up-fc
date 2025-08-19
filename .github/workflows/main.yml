@@ -24,7 +24,7 @@ jobs:
           key: ${{ secrets.DO_SSH_KEY }}
           script: |
             cd /var/www/website
-            git pull origin main || git clone YOUR_WEBSITE_REPO_URL .
+            git pull origin main || git clone https://x-access-token:${GH_TOKEN}@github.com/YOUR_USERNAME/YOUR_WEBSITE_REPO.git .
             npm install
             npm run build
             pm2 restart website || pm2 start npm --name "website" -- run start
