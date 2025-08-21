@@ -71,10 +71,8 @@ const Matchedwages = ({ showAll }) => {
                       {/* <!-- Right User --> */}
                       <div className="flex md:flex-row flex-col items-start md:items-center md:space-x-3 space-y-3 md:w-1/3 w-[40%] justify-end ml-4 md:ml-0">
                         <img
-                          src={
-                            `${process.env.NEXT_PUBLIC_IMAGE_URL}${data?.participant2?.profile_image}` ||
-                            "/images/wager2.svg"
-                          }
+            src={data?.participant2?.profile_image ? `${process.env.NEXT_PUBLIC_IMAGE_URL}${data?.participant2?.profile_image}` : "/images/no-profile-picture.svg"}
+                           
                           alt="Paul"
                           className="w-10 h-10 rounded-full object-cover"
                         />

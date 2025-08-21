@@ -2,3 +2,4 @@ export const PREDICTION_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_PREDICTION_CO
 export const STR8_TOKEN_ADDRESS =  process.env.NEXT_PUBLIC_TOKEN_CONTRACT_ADDRESS || "0xB217899C06F48cE5508335099A57FCa681D6C51a"
 
 export const RPC_URL= process.env.NEXT_PUBLIC_BASE_RPC_URL || "https://polygon-amoy.gateway.tenderly.co"
+export const BASE_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID) || 8453

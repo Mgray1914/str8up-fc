@@ -3,16 +3,31 @@ import ABI from "../abi/predictionABI.json";
 import {
   PREDICTION_CONTRACT_ADDRESS,
   STR8_TOKEN_ADDRESS,
+  BASE_CHAIN_ID as BaseChainID
 } from "../config/index";
 import Web3 from "web3";
 import commonABI from "../abi/ABI.json";
+import toast from "react-hot-toast";
 
 export async function placeBet(predictionId, option, amount) {
   try {
     if (!window.ethereum) throw new Error("Wallet not found");
 
     const web3 = new Web3(window.ethereum);
-
+  try{
+    const provider = window.ethereum
+   const currentChainId = await provider.request({
+     method: "eth_chainId",
+   });
+   const decimalChainId = parseInt(currentChainId, 16)
+   console.log(" place bet decimal chain id------------>", decimalChainId)
+    if(decimalChainId !== BaseChainID){
+      toast.error("Please switch to Base Mainnet",{id:"chainSwitchError"})
+      throw new Error("Please Select Base Mainnet")
+    }
+  }catch(error){
+    throw error
+  }
     const accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
@@ -61,6 +76,21 @@ export async function checkAndApproveAllowance(
   abi = commonABI,
   toAddress = PREDICTION_CONTRACT_ADDRESS
 ) {
+
+  try{
+    const provider = window.ethereum
+   const currentChainId = await provider.request({
+     method: "eth_chainId",
+   });
+   const decimalChainId = parseInt(currentChainId, 16)
+   console.log("decimal chain id------------>", decimalChainId)
+    if(decimalChainId !== BaseChainID){
+      toast.error("Please switch to Base Mainnet", {id:"chainSwitchError"})
+     throw new Error("Please Select Base Mainnet")
+    }
+  }catch(error){
+    throw error
+  }
   const web3 = new Web3(window.ethereum);
   const tokenContract = new web3.eth.Contract(abi, contractAddress);
 
@@ -111,6 +141,22 @@ export async function checkAndApproveAllowance(
 
 export async function matchBet(predictionId, targetBetId) {
   try {
+      try{
+    const provider = window.ethereum
+   const currentChainId = await provider.request({
+     method: "eth_chainId",
+   });
+   const decimalChainId = parseInt(currentChainId, 16)
+   console.log(" match decimal chain id------------>", decimalChainId)
+    if(decimalChainId !== BaseChainID){
+      toast.error("Please switch to Base Mainnet", {id:"chainSwitchError"})
+     throw new Error("Please Select Base Mainnet")
+    }
+  }catch(error){
+    throw error
+  }
+
+
     if (!window.ethereum) throw new Error("Wallet not found");
 
     const accounts = await window.ethereum.request({

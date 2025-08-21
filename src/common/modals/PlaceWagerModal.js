@@ -3,12 +3,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { callApi } from "../../services/apiServices";
 import { PredictionDetailContext } from "../../components/PredictionDetails";
-import { checkAndApproveAllowance, matchBet, placeBet } from "../../utlis/blockChain";
+import {
+  checkAndApproveAllowance,
+  matchBet,
+  placeBet,
+} from "../../utlis/blockChain";
 import { useGlobalStates } from "../../contexts/WalletModalContext";
 import StepsModal from "./StepsModal";
-import { formatFromWei, getTokenBalance, Transaction } from "../../utlis/functions";
+import {
+  formatFromWei,
+  getTokenBalance,
+  Transaction,
+} from "../../utlis/functions";
 import toast from "react-hot-toast";
 import Loader from "../Loader";
+import { BASE_CHAIN_ID } from "../../config";
 
 const PlaceWagerModal = ({
   isOpen,
@@ -26,46 +35,46 @@ const PlaceWagerModal = ({
     approval: null,
     betLoader: null,
   });
-  const { walletAddress, setWalletAddress } = useGlobalStates();
-  const [stepsModalOpen, setStepsModalOpen] = useState(false);    //Steps Modal
-  const [tryCount, setTryCount] = useState(0)
-  const [showloader, setShowLoader] = useState(false)
-  const [balance, setBalance] = useState(0)
+  const { walletAddress, setWalletAddress, balance, setBalance} = useGlobalStates();
+  const [stepsModalOpen, setStepsModalOpen] = useState(false); //Steps Modal
+  const [tryCount, setTryCount] = useState(0);
+  const [showloader, setShowLoader] = useState(false);
   const { fetchPredictionDetails } = useContext(PredictionDetailContext);
 
+  const isLive = React.useMemo(() => {
+    if (!predictionDetail?.startTimestamp || !predictionDetail?.endTimestamp)
+      return false;
+    const now = new Date();
+    const startTime = new Date(predictionDetail.startTimestamp);
+    const endTime = new Date(predictionDetail.endTimestamp);
+    const threeMinBeforeStart = new Date(startTime.getTime() - 3 * 60 * 1000);
+    return now >= threeMinBeforeStart && now <= endTime;
+  }, [predictionDetail]);
 
-    const isLive = React.useMemo(() => {
-      if (!predictionDetail?.startTimestamp || !predictionDetail?.endTimestamp)
-        return false;
-      const now = new Date();
-      const startTime = new Date(predictionDetail.startTimestamp);
-      const endTime = new Date(predictionDetail.endTimestamp);
-      const threeMinBeforeStart = new Date(startTime.getTime() - 3 * 60 * 1000);
-      return now >= threeMinBeforeStart && now <= endTime;
-    }, [predictionDetail]);
-    
-  useEffect(()=>{
-    const getBal = async () => {
-      const tokenBalance = await getTokenBalance(walletAddress)
-      setBalance(parseFloat(tokenBalance.balance))
+  useEffect(() => {
+   
+    if (walletAddress) {
+      getBal();
     }
-    if(walletAddress){
-      getBal()
-    }
-  },[walletAddress])
+  }, [walletAddress]);
 
-console.log("balance", balance)
+   const getBal = async () => {
+      const tokenBalance = await getTokenBalance(walletAddress);
+      setBalance(parseFloat(tokenBalance.balance));
+      console.log("Updated Balance", tokenBalance)
+    };
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  console.log("balance", balance);
+
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const opponentSelectedOption = selectedOpneWagers?.option_participant_1;
 
-
-  const handleModalClose=()=>{
-    onClose(false)
-    setTryCount(0)
-    setAmount("")
-  }
+  const handleModalClose = () => {
+    onClose(false);
+    setTryCount(0);
+    setAmount("");
+  };
 
   useEffect(() => {
     console.log("uuu", predictionDetail);
@@ -78,8 +87,8 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         setSelectedOption(predictionDetail?.option1);
       }
       if (mode === "accept") {
-        const rawAmount = selectedOpneWagers.bet_amount         //selectedOpneWagers.bet_amount?.toString()
-        const readableAmount = formatFromWei(rawAmount)
+        const rawAmount = selectedOpneWagers.bet_amount; //selectedOpneWagers.bet_amount?.toString()
+        const readableAmount = formatFromWei(rawAmount);
         setAmount(readableAmount);
       }
     }
@@ -99,37 +108,56 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
-    console.log("islive", isLive)
-    if(isLive){
-      toast.error("Prediction is live cannot place bet", {id : "place-bet"})
+    console.log("islive", isLive);
+    if (isLive) {
+      toast.error("Prediction is live cannot place bet", { id: "place-bet" });
       return;
     }
     const numericAmount = parseFloat(amount);
-    if(!walletAddress){
-      toast.error("Wallet not connected", {id : "wallet-not-connected"})
-      return
+    if (!walletAddress) {
+      toast.error("Wallet not connected", { id: "wallet-not-connected" });
+      return;
     }
     if (!amount) {
-      setError("Enter Amount")
+      setError("Enter Amount");
       return;
     } else if (isNaN(numericAmount)) {
-      setError("Invalid amount")
+      setError("Invalid amount");
       return;
     } else if (numericAmount <= 0) {
-      setError("Amount must be greater than 0")
+      setError("Amount must be greater than 0");
       return;
-    } else if(amount > balance){
-      setError("Insufficient token balance")
-      return
-    }else {
+    } else if (amount > balance) {
+      setError("Insufficient token balance");
+      return;
+    } else {
       setError("");
+    }
+
+    try {
+      const provider = window.ethereum;
+      const currentChainId = await provider.request({
+        method: "eth_chainId",
+      });
+      console.log("hex chain id------------>", currentChainId);
+      const decimalChainId = parseInt(currentChainId, 16);
+      console.log("decimal chain id------------>", decimalChainId);
+      console.log("Switch chain++++++++", BASE_CHAIN_ID);
+      if (decimalChainId !== BASE_CHAIN_ID) {
+        toast.error("Please switch to Base Mainnet", {
+          id: "chainSwitchError",
+        });
+        return;
+      }
+    } catch (error) {
+      console.log("chain error", error);
     }
 
     try {
       setLoader({
         approval: null,
         betLoader: null,
-      })
+      });
       setStepsModalOpen(true);
       setLoader((prev) => ({ ...prev, approval: true }));
       await checkAndApproveAllowance(amount, walletAddress);
@@ -151,16 +179,19 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
           Betamount
         );
         console.log("bet response", response);
-            if (response?.receipt?.blockNumber || response?.blockNumber) {
-        await Transaction(response?.receipt?.blockNumber || response?.blockNumber);
-      }
-        setLoader((prev) => ({ ...prev, betLoader: false }));       
+        if (response?.receipt?.blockNumber || response?.blockNumber) {
+          await Transaction(
+            response?.receipt?.blockNumber || response?.blockNumber
+          );
+          getBal();
+        }
+        setLoader((prev) => ({ ...prev, betLoader: false }));
         ResetStates();
-        setStepsModalOpen(false)
-        setShowLoader(true)
-        await delay(3000)
-      await  fetchPredictionDetails();
-      setShowLoader(false)
+        setStepsModalOpen(false);
+        setShowLoader(true);
+        await delay(3000);
+        await fetchPredictionDetails();
+        setShowLoader(false);
         setBetSuccessModal(true);
         handleModalClose();
       }
@@ -168,33 +199,32 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       if (mode === "accept") {
         setLoader((prev) => ({ ...prev, betLoader: true }));
         const BetpredictionId = parseInt(predictionDetail?.predictionId);
-        console.log("selectedOpneWagers",selectedOpneWagers)
-        const BetTargetId = selectedOpneWagers?.betId || selectedOpneWagers?.betAId
-        const matchedResponse = await matchBet(BetpredictionId, BetTargetId)
-        console.log("matched response", matchedResponse)
+        console.log("selectedOpneWagers", selectedOpneWagers);
+        const BetTargetId =
+          selectedOpneWagers?.betId || selectedOpneWagers?.betAId;
+        const matchedResponse = await matchBet(BetpredictionId, BetTargetId);
+        console.log("matched response", matchedResponse);
 
-         
         await Transaction(matchedResponse.receipt.blockNumber);
-     
-        setLoader((prev) => ({ ...prev, betLoader: false }));   
-        if(matchedResponse) {   
-        ResetStates();
-        setStepsModalOpen(false)
-        setShowLoader(true)
-        await delay(3000)
-        await fetchPredictionDetails();
-        setShowLoader(false)
-        setBetSuccessModal(true);
-        handleModalClose();
-
-      }}
+        getBal();
+        setLoader((prev) => ({ ...prev, betLoader: false }));
+        if (matchedResponse) {
+          ResetStates();
+          setStepsModalOpen(false);
+          setShowLoader(true);
+          await delay(3000);
+          await fetchPredictionDetails();
+          setShowLoader(false);
+          setBetSuccessModal(true);
+          handleModalClose();
+        }
+      }
     } catch (error) {
-      console.log("bet Error", error)
+      console.log("bet Error", error);
       setStepsModalOpen(false); // 🔁 CLOSE modal on failure or cancel
-      setTryCount(tryCount+1)
-
-    }finally{
-      setShowLoader(false)
+      setTryCount(tryCount + 1);
+    } finally {
+      setShowLoader(false);
     }
   };
 
@@ -203,14 +233,14 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     setLoader({
       approval: null,
       betLoader: null,
-    })
+    });
     // setSelectedOption("")
   }
   console.log("selected", selectedOption);
 
   return (
     <>
-    {showloader &&  <Loader/>}
+      {showloader && <Loader />}
       <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
         <div
           className="bg-[#090909] rounded-[20px] max-w-[675px] w-[90%] md:w-[full] p-[20px] md:p[30px] pt-[30px] md:pt-[60px] border border-white shadow-[0px_0px_58px_0px_#3d3b3cEB] relative"
@@ -239,8 +269,8 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                   <a
                     // onClick={() => setSelectedOption(predictionDetail?.option1)}
                     onClick={() => {
-                      if(mode === "accept"){
-                        return
+                      if (mode === "accept") {
+                        return;
                       }
                       if (
                         opponentSelectedOption !== predictionDetail?.option1
@@ -266,8 +296,8 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                   <a
                     // onClick={() => setSelectedOption(predictionDetail?.option2)}
                     onClick={() => {
-                      if(mode === "accept"){
-                        return
+                      if (mode === "accept") {
+                        return;
                       }
                       if (
                         opponentSelectedOption !== predictionDetail?.option2
@@ -324,14 +354,18 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
               class="btn-gradient group hover:from-green hover:to-themeblue mt-[40px]"
             >
               <span class="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent">
-                {tryCount>0 ? "Try Again" : "SUBMIT"}
+                {tryCount > 0 ? "Try Again" : "SUBMIT"}
               </span>
             </button>
           </div>
         </div>
       </div>
-      <StepsModal isModalOpen={stepsModalOpen} isCloseModal={setStepsModalOpen} stepOneloader={loader.approval} steptwoloader={loader.betLoader}/>
-
+      <StepsModal
+        isModalOpen={stepsModalOpen}
+        isCloseModal={setStepsModalOpen}
+        stepOneloader={loader.approval}
+        steptwoloader={loader.betLoader}
+      />
     </>
   );
 };
