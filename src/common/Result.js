@@ -146,8 +146,14 @@ const Result = ({ data, type }) => {
             className={`text-[#012B00] font-bold md:text-2xl text-[13px] h-[40px] md:h-[50px] px-[10px] md:px-[20px] rounded-xl ${amountBgcolor} shadow-[4px_2px_9px_1px_${getBetAmountShadow(resultStatus)}] flex items-center justify-center`}
           >
             Bet Amount: {Number(formatFromWei(data?.bet_amount || "0")).toFixed(2)}
-
           </span>
+          {resultStatus === resultType.WINNER &&
+          <span
+            className={`text-[#012B00] font-bold md:text-2xl text-[13px] h-[40px] md:h-[50px] px-[10px] md:px-[20px] rounded-xl ${amountBgcolor} shadow-[4px_2px_9px_1px_${getBetAmountShadow(resultStatus)}] flex items-center justify-center`}
+          >
+            Rewards Won: {Number(formatFromWei(data?.winningAmount || "0")).toFixed(2)}
+          </span>
+}
         </div>
 
         {/* ---Opposition--- */}

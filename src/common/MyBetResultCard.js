@@ -91,9 +91,16 @@ export default function MyBetResultCard({ type, data }) {
           }
           
         </div>
+        <div className="flex items-center gap-4">
+        { type === "winner" &&
+        <button className="text-white font-medium px-[35px] md:py-[10px] py-[5px] rounded-[18px] border border-[#17C047] relative z-10 shadow-[1px_-1px_4px_1px_#13A6D4] text-[16px]">
+          Rewards Won: {Number(formatFromWei(data?.winningAmount || "0")).toFixed(2)}
+        </button>
+        }
         <button className="text-white font-medium px-[35px] md:py-[10px] py-[5px] rounded-[18px] border border-[#17C047] relative z-10 shadow-[1px_-1px_4px_1px_#13A6D4] text-[16px]">
           Bet Amount: {Number(formatFromWei(data?.bet_amount || "0")).toFixed(2)}
         </button>
+        </div>
       </div>
     </>
   );

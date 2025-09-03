@@ -16,8 +16,78 @@ import {
 } from "../utlis/functions";
 import { useRouter } from "next/router";
 import { useGlobalStates } from "../contexts/WalletModalContext";
-export default function SliderPrediction() {
-  const [predictionList, setPredictionList] = useState([]);
+
+ const dummyData = [{
+            "team1": {
+                "name": "Option 1",
+                "image": "/images/cowboys.svg"
+            },
+            "team2": {
+                "name": "Option 2",
+                "image": "/images/eagles.svg"
+            },
+            "_id": "",
+            "category": {
+                "_id": "689c6dcde529f4ba97bccdb4",
+                "name": "Crypto world"
+            },
+            "question": "Question",
+            "location": "Location",
+            "startTimestamp": "2030-01-01T00:00:00.000Z",
+            "endTimestamp": "2030-01-01T00:00:00.000Z",
+            "status": "RESULT PENDING",
+            "viewStatus": "SHOW ON WEBSITE",
+            "betStatus": "OPEN",
+            "txHash": "0xb982443257c4024ce7090f1cc6d8eaf2b22c9ed140fcfd74913850b5a209e4f7"
+        },
+       {
+            "team1": {
+                "name": "Option 1",
+                "image": "/images/cowboys.svg"
+            },
+            "team2": {
+                "name": "Option 2",
+                "image": "/images/eagles.svg"
+            },
+            "_id": "",
+            "category": {
+                "_id": "689c6dcde529f4ba97bccdb4",
+                "name": "Crypto world"
+            },
+            "question": "Question",
+            "location": "Location",
+            "startTimestamp": "2030-01-01T00:00:00.000Z",
+            "endTimestamp": "2030-01-01T00:00:00.000Z",
+            "status": "RESULT PENDING",
+            "viewStatus": "SHOW ON WEBSITE",
+            "betStatus": "OPEN",
+            "txHash": "0xb982443257c4024ce7090f1cc6d8eaf2b22c9ed140fcfd74913850b5a209e4f7"
+        },
+       {
+            "team1": {
+                "name": "Option 1",
+                "image": "/images/cowboys.svg"
+            },
+            "team2": {
+                "name": "Option 2",
+                "image": "/images/eagles.svg"
+            },
+            "_id": "",
+            "category": {
+                "_id": "689c6dcde529f4ba97bccdb4",
+                "name": "Crypto world"
+            },
+            "question": "Question",
+            "location": "Location",
+            "startTimestamp": "2030-01-01T00:00:00.000Z",
+            "endTimestamp": "2030-01-01T00:00:00.000Z",
+            "status": "RESULT PENDING",
+            "viewStatus": "SHOW ON WEBSITE",
+            "betStatus": "OPEN",
+            "txHash": "0xb982443257c4024ce7090f1cc6d8eaf2b22c9ed140fcfd74913850b5a209e4f7"
+        }]
+export default function SliderPrediction({}) {
+  const [predictionList, setPredictionList] = useState(dummyData);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true); // 👈 Track if more pages exist
@@ -27,6 +97,7 @@ export default function SliderPrediction() {
   const limit = 6;
   const router = useRouter();
   const { walletAddress } = useGlobalStates();
+  const fetchRefCOunt = useRef(0);
 
   useEffect(() => {
     fetchPrediction();
@@ -51,7 +122,13 @@ export default function SliderPrediction() {
         setHasMore(false); // No more data
       }
 
-      setPredictionList((prev) => [...prev, ...newData]); // Append
+      if(fetchRefCOunt.current === 0){
+        setPredictionList(newData);
+      } else {
+        setPredictionList((prev) => [...prev, ...newData]); // Append
+      }
+
+      fetchRefCOunt.current += 1;
       setPage(currentPage); // Update page
     } catch (err) {
       console.error(err);
@@ -254,8 +331,8 @@ export default function SliderPrediction() {
                   <button className="btn-gradient group hover:from-green hover:to-themeblue">
                     <span
                       className="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent"
-                      onClick={() =>
-                        walletAddress
+                      onClick={() => 
+                        (walletAddress && item?._id)
                           ? router.push(`/prediction-details/${item._id}`)
                           : router.push(`/prediction`)
                       }

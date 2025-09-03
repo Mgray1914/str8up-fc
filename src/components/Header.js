@@ -123,6 +123,7 @@ const Header = () => {
     setWalletDisconnectPopUp(false);
     window.location.reload();
     };
+    
 
   return (
     <>
@@ -169,7 +170,7 @@ const Header = () => {
             }}   className={`hover:text-white ${router.asPath === "/#benefits" ? "text-white" : "text-gray-400"}`}>
               Benefits
             </Link>
-            <Link href="/faqs" className={`hover:text-white ${router.pathname === "/faqs" ? "text-white " : ""}`}>
+            <Link href="/#faqs" className={`hover:text-white ${router.asPath === "/#faqs" ? "text-white " : "text-gray-400"}`}>
               FAQs
             </Link>
           </nav>
