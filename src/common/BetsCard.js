@@ -6,9 +6,11 @@ import {
   isLocalTimePastUtcInput,
 } from "../utlis/functions";
 import { useRouter } from "next/router";
+import { useGlobalStates } from "../contexts/WalletModalContext";
 
 export default function BetsCard({ data = [], type = "active", size }) {
   const router = useRouter();
+  const { userProfile } = useGlobalStates();
   if (!data.length) {
     return (
       <p className="text-white text-center col-span-full mt-10">
@@ -66,7 +68,7 @@ const isLive = now >= threeMinBeforeStart && now <= endTime;
     statusLabel = "Place a Wager";
   }
 } else {
-  const isWin = bet.participant1 === bet.winner;
+  const isWin = userProfile._id === bet.winner;
   statusLabel = isWin ? "• Win" : "• Loss";
   statusColor = isWin ? "text-[#00FF00]" : "text-[#FF0000]";
 }

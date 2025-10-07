@@ -181,7 +181,7 @@ const PlaceWagerModal = ({
         console.log("bet response", response);
         if (response?.receipt?.blockNumber || response?.blockNumber) {
           await Transaction(
-            response?.receipt?.blockNumber || response?.blockNumber
+            response?.receipt?.blockNumber || response?.blockNumber, "PlaceBet"
           );
           getBal();
         }
@@ -205,7 +205,7 @@ const PlaceWagerModal = ({
         const matchedResponse = await matchBet(BetpredictionId, BetTargetId);
         console.log("matched response", matchedResponse);
 
-        await Transaction(matchedResponse.receipt.blockNumber);
+        await Transaction(matchedResponse.receipt.blockNumber, "MatchBet");
         getBal();
         setLoader((prev) => ({ ...prev, betLoader: false }));
         if (matchedResponse) {

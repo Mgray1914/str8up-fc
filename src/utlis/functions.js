@@ -194,13 +194,16 @@ export function formatFromWei(weiAmount, unit = "ether") {
   }
 }
 
-export const Transaction = async (blockNumber) => {
+export const Transaction = async (blockNumber, eventType) => {
   try {
     const response = await callApi({
       method: "post",
       url: "/transactions",
       data: {
         latestBlock: parseInt(blockNumber),
+      },
+      params: {
+        eventType: eventType,
       },
     });
     console.log("createTransaction response", response);
