@@ -40,4 +40,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-package-lock.json
+package-lock.json.env.local
+wc-credits/artifacts/
+wc-credits/cache/
+wc-credits/node_modules/
