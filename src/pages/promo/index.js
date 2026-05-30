@@ -112,7 +112,7 @@ export default function PromoPage() {
         <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting World Cup 2026 match outcomes." />
       </Head>
 
-      <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center px-4 py-16">
+      <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center px-4 pt-28 pb-16">
         <div className="max-w-lg w-full text-center">
 
           <p className="text-sm text-gray-500 uppercase tracking-widest mb-3">Str8Up Gaming Presents</p>
@@ -135,7 +135,7 @@ export default function PromoPage() {
             <div className="space-y-4">
               <div className="bg-[#1a1a1a] border border-green-500 rounded-xl p-6">
                 <p className="text-sm text-gray-400 mb-1">Connected Wallet</p>
-                <p className="text-green-400 font-mono text-sm break-all">{evmAddress}</p>
+                <p className="text-green-400 font-mono text-sm">{evmAddress ? evmAddress.slice(0,6) + "..." + evmAddress.slice(-4) : "Loading..."}</p>
                 <p className="text-xs text-gray-500 mt-1">{user.email}</p>
               </div>
               <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6">

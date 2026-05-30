@@ -18,11 +18,11 @@ export default function Footer() {
                 <ul className="space-y-3 text-white text-sm">
                   <li className="flex gap-3">
                     <img alt="location" src="/images/location.svg" />
-                    <p>1 Street 8A, Za'abeel 2, Dubai DU, ARE</p>
+                    <p>Miami, FL USA</p>
                   </li>
                   <li className="flex gap-3">
                     <img alt="sms" src="/images/sms.svg" />
-                    <a href="#" className="hover:underline">www.str8up.com</a>
+                    <a href="#" className="hover:underline">Admin@str8upgaming.com</a>
                   </li>
                 </ul>
               </div>
