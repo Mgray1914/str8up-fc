@@ -252,7 +252,11 @@ export default function MatchDetail() {
             {/* Place a Wager button */}
             {isUpcoming && (
               <div className="max-w-sm mx-auto">
-                <button onClick={() => setShowWager(true)} disabled={!pick}
+                <button onClick={() => {
+                  const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+                  if (wallet) fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r=>r.json()).then(d=>{if(d.free!==undefined)setBalance(d.free)});
+                  setShowWager(true);
+                }} disabled={!pick}
                   className="btn-gradient group hover:from-green hover:to-themeblue disabled:opacity-30 disabled:cursor-not-allowed">
                   <span className="btn-inner group-hover:bg-transparent">Place a Wager</span>
                 </button>

@@ -43,6 +43,8 @@ export default function PromoPage() {
   // Debug CDP state
   useEffect(() => {
     if (evmAddress && typeof window !== 'undefined') localStorage.setItem('wc_wallet', evmAddress);
+    const walletForBal = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (walletForBal && !realBalance) fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${walletForBal}`).then(r=>r.json()).then(d=>{if(d.free!==undefined)setRealBalance(d.free)}).catch(()=>{});
     console.log('CDP Debug:', { user: !!user, evmAddress, isInitialized, isSignedIn });
   }, [user, evmAddress, isInitialized, isSignedIn]);
   const [email, setEmail] = useState('');
