@@ -248,8 +248,9 @@ export default function Predictions() {
   const [balance, setBalance] = useState(50000);
 
   useEffect(() => {
-    if (evmAddress) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
         .catch(err => console.error('Balance error:', err));
@@ -257,8 +258,9 @@ export default function Predictions() {
   }, [evmAddress]);
 
   useEffect(() => {
-    if (evmAddress) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
         .catch(err => console.error('Balance error:', err));
@@ -266,8 +268,9 @@ export default function Predictions() {
   }, [evmAddress]);
 
   useEffect(() => {
-    if (evmAddress) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
         .catch(err => console.error('Balance error:', err));

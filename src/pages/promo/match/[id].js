@@ -118,8 +118,9 @@ export default function MatchDetail() {
   const match = FIXTURES.find(f => f.id === id);
 
   useEffect(() => {
-    if (evmAddress) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
         .catch(err => console.error('Balance fetch error:', err));
@@ -127,8 +128,9 @@ export default function MatchDetail() {
   }, [evmAddress]);
 
   useEffect(() => {
-    if (evmAddress) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
         .catch(err => console.error('Balance fetch error:', err));
