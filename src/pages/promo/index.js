@@ -40,6 +40,17 @@ export default function PromoPage() {
     }
   }, [user, evmAddress, walletCreating]);
 
+  // Fetch real balance
+  useEffect(() => {
+    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
+        .then(r => r.json())
+        .then(data => { if (data.free !== undefined) setRealBalance(data.free); })
+        .catch(() => {});
+    }
+  }, [evmAddress, registered]);
+
   // Debug CDP state
   useEffect(() => {
     if (evmAddress && typeof window !== 'undefined') localStorage.setItem('wc_wallet', evmAddress);
