@@ -3,6 +3,21 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
 
+const FLAGS = {
+  "Mexico":"\u{1F1F2}\u{1F1FD}","South Africa":"\u{1F1FF}\u{1F1E6}","Korea Republic":"\u{1F1F0}\u{1F1F7}","Czechia":"\u{1F1E8}\u{1F1FF}",
+  "Canada":"\u{1F1E8}\u{1F1E6}","Bosnia & Herzegovina":"\u{1F1E7}\u{1F1E6}","Qatar":"\u{1F1F6}\u{1F1E6}","Switzerland":"\u{1F1E8}\u{1F1ED}",
+  "Brazil":"\u{1F1E7}\u{1F1F7}","Morocco":"\u{1F1F2}\u{1F1E6}","Haiti":"\u{1F1ED}\u{1F1F9}","Scotland":"\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}",
+  "USA":"\u{1F1FA}\u{1F1F8}","Paraguay":"\u{1F1F5}\u{1F1FE}","Australia":"\u{1F1E6}\u{1F1FA}","Turkiye":"\u{1F1F9}\u{1F1F7}",
+  "Germany":"\u{1F1E9}\u{1F1EA}","Curacao":"\u{1F1E8}\u{1F1FC}","Cote d'Ivoire":"\u{1F1E8}\u{1F1EE}","Ecuador":"\u{1F1EA}\u{1F1E8}",
+  "Netherlands":"\u{1F1F3}\u{1F1F1}","Japan":"\u{1F1EF}\u{1F1F5}","Sweden":"\u{1F1F8}\u{1F1EA}","Tunisia":"\u{1F1F9}\u{1F1F3}",
+  "Belgium":"\u{1F1E7}\u{1F1EA}","Egypt":"\u{1F1EA}\u{1F1EC}","IR Iran":"\u{1F1EE}\u{1F1F7}","New Zealand":"\u{1F1F3}\u{1F1FF}",
+  "Spain":"\u{1F1EA}\u{1F1F8}","Cabo Verde":"\u{1F1E8}\u{1F1FB}","Saudi Arabia":"\u{1F1F8}\u{1F1E6}","Uruguay":"\u{1F1FA}\u{1F1FE}",
+  "France":"\u{1F1EB}\u{1F1F7}","Senegal":"\u{1F1F8}\u{1F1F3}","Iraq":"\u{1F1EE}\u{1F1F6}","Norway":"\u{1F1F3}\u{1F1F4}",
+  "Argentina":"\u{1F1E6}\u{1F1F7}","Algeria":"\u{1F1E9}\u{1F1FF}","Austria":"\u{1F1E6}\u{1F1F9}","Jordan":"\u{1F1EF}\u{1F1F4}",
+  "Portugal":"\u{1F1F5}\u{1F1F9}","Congo DR":"\u{1F1E8}\u{1F1E9}","Uzbekistan":"\u{1F1FA}\u{1F1FF}","Colombia":"\u{1F1E8}\u{1F1F4}",
+  "England":"\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}","Croatia":"\u{1F1ED}\u{1F1F7}","Ghana":"\u{1F1EC}\u{1F1ED}","Panama":"\u{1F1F5}\u{1F1E6}"
+};
+
 const FIXTURES = [
   {id:"GS_A_1",home:"Mexico",away:"South Africa",group:"A",kickoff:"2026-06-11T19:00:00Z"},
   {id:"GS_A_2",home:"Korea Republic",away:"Czechia",group:"A",kickoff:"2026-06-12T02:00:00Z"},
@@ -80,82 +95,143 @@ const FIXTURES = [
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 
-function MatchCard({ match, onPredict, predictions }) {
-  const existing = predictions[match.id];
+const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'});
+const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+
+function MatchCard({ match, prediction, router }) {
   const kickoff = new Date(match.kickoff);
   const isUpcoming = kickoff > new Date();
-  const dateStr = kickoff.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const timeStr = kickoff.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   return (
-    <div className="bg-[#1a1a1a] border border-gray-800 rounded-xl p-4 mb-3 hover:border-gray-600 transition">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-xs text-gray-600 font-medium">Group {match.group}</span>
-        <span className="text-xs text-gray-600">{dateStr} · {timeStr}</span>
+    <div className="text-white rounded-[20px] w-full shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5">
+      <div className="flex justify-center items-center gap-4 mb-4">
+        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-2xl bg-[#1C1C1C]">
+          {FLAGS[match.home] || match.home.slice(0,2)}
+        </div>
+        <span className="text-[22px] font-regular">VS</span>
+        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-2xl bg-[#1C1C1C]">
+          {FLAGS[match.away] || match.away.slice(0,2)}
+        </div>
       </div>
-      <div className="flex items-center justify-between mb-3">
-        <p className="flex-1 text-center font-bold text-white text-sm">{match.home}</p>
-        <span className="text-gray-700 font-bold px-2">VS</span>
-        <p className="flex-1 text-center font-bold text-white text-sm">{match.away}</p>
+      <div className="text-center mb-4">
+        <h2 className="text-[18px] font-semibold leading-tight">{match.home} vs {match.away}</h2>
+        <p className="text-xs text-gray-500 mt-1">Group {match.group}</p>
       </div>
-      {existing ? (
-        <div className="bg-[#0d2b0d] border border-green-900 rounded-lg p-2 text-center">
-          <p className="text-green-400 text-xs font-semibold">
-            Predicted: {existing.pick==='home'?match.home:existing.pick==='away'?match.away:'Draw'} · {existing.stake.toLocaleString()} credits
-          </p>
+      <div className="flex justify-between gap-3 mb-5">
+        <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
+          <p className="text-gray-400 text-[11px] mb-0.5">KICKOFF</p>
+          <p className="text-[15px]">{formatDate(match.kickoff)}</p>
+          <p className="text-sm text-gray-400">{formatTime(match.kickoff)}</p>
+        </div>
+        <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md text-center">
+          <p className="text-gray-400 text-[11px] mb-0.5">STATUS</p>
+          {prediction ? (
+            <p className="text-sm mt-1">
+              <span className={prediction.status === 'MATCHED' ? 'open' : 'unmatched'}>
+                {prediction.status === 'MATCHED' ? 'Matched' : 'Open'}
+              </span>
+            </p>
+          ) : (
+            <p className="text-[15px] text-gray-500">{isUpcoming ? 'Open' : 'Closed'}</p>
+          )}
+        </div>
+      </div>
+      {prediction ? (
+        <div className="text-center py-2 border border-green-800 rounded-[18px] bg-[#0a1f0a]">
+          <p className="text-green-400 text-sm">Predicted: {prediction.pick === 'home' ? match.home : prediction.pick === 'away' ? match.away : 'Draw'}</p>
+          <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} WC Credits</p>
         </div>
       ) : isUpcoming ? (
-        <button onClick={()=>onPredict(match)} className="w-full bg-[#1DA1F2] text-white font-semibold py-2 rounded-lg text-sm hover:opacity-90 transition">
-          Make Prediction
+        <button className="btn-gradient group hover:from-green hover:to-themeblue" onClick={() => router.push("/promo/match/" + match.id)}>
+          <span className="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent">Place a Wager</span>
         </button>
       ) : (
-        <div className="text-center text-gray-700 text-xs py-1">Predictions closed</div>
+        <button className="btn-gradient opacity-50 cursor-not-allowed">
+          <span className="btn-inner">Closed</span>
+        </button>
       )}
     </div>
   );
 }
 
-function PredictionModal({ match, onClose, onSubmit, balance }) {
+function WagerModal({ match, onClose, onSubmit, balance }) {
   const [pick, setPick] = useState(null);
   const [stake, setStake] = useState(1000);
+  const [step, setStep] = useState('pick');
   if (!match) return null;
+
+  const handleConfirm = () => {
+    if (step === 'pick') { setStep('confirm'); return; }
+    if (step === 'confirm') { onSubmit({ matchId: match.id, pick, stake }); setStep('success'); return; }
+    if (step === 'success') { onClose(); setStep('pick'); }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-end sm:items-center justify-center px-4 pb-6">
-      <div className="bg-[#141414] border border-gray-700 rounded-2xl p-6 w-full max-w-sm">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-bold text-white">Place Prediction</h3>
-          <button onClick={onClose} className="text-gray-600 hover:text-white">✕</button>
-        </div>
-        <p className="text-gray-500 text-xs text-center mb-4">{match.home} vs {match.away}</p>
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o=>(
-            <button key={o.v} onClick={()=>setPick(o.v)}
-              className={"py-3 rounded-xl text-xs font-semibold border transition "+(pick===o.v?'bg-[#1DA1F2] border-[#1DA1F2] text-white':'border-gray-700 text-gray-400 hover:border-gray-500')}>
-              {o.l}
+    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center px-4">
+      <div className="bg-[#111] border border-[#333] rounded-[20px] p-6 w-full max-w-md relative shadow-[1px_-1px_4px_1px_#3d3c3ceb]">
+        <button onClick={() => { onClose(); setStep('pick'); }} className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">&times;</button>
+
+        {step === 'pick' && (
+          <>
+            <h3 className="text-center text-xl font-semibold text-white mb-2">Place a Wager</h3>
+            <p className="text-center text-gray-500 text-sm mb-6">Choose a team to place a prediction</p>
+            <div className="flex justify-center items-center gap-4 mb-6">
+              <div className="text-3xl">{FLAGS[match.home]}</div>
+              <span className="text-gray-500">VS</span>
+              <div className="text-3xl">{FLAGS[match.away]}</div>
+            </div>
+            <div className="flex gap-3 mb-6">
+              {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
+                <button key={o.v} onClick={() => setPick(o.v)}
+                  className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
+                    pick === o.v ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-400 hover:border-[#555]'
+                  }`}>{o.l}</button>
+              ))}
+            </div>
+            <div className="mb-6">
+              <p className="text-gray-400 text-sm mb-2">Bet Amount <span className="float-right text-gray-600">Bal: {balance.toLocaleString()}</span></p>
+              <input type="number" value={stake} min={100} max={balance} step={100}
+                onChange={e => setStake(Math.min(Math.max(100, Number(e.target.value)), balance))}
+                className="w-full bg-[#1C1C1C] border border-[#333] text-white px-4 py-3 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#1DA1F2]" />
+              <div className="flex gap-2 mt-2">
+                {[500,1000,5000,10000].map(a => (
+                  <button key={a} onClick={() => setStake(Math.min(a, balance))}
+                    className="flex-1 text-xs py-1.5 rounded-lg border border-[#333] text-gray-500 hover:border-[#555] hover:text-white transition">
+                    {a >= 1000 ? a/1000+'k' : a}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={handleConfirm} disabled={!pick || stake < 100}
+              className="btn-gradient group hover:from-green hover:to-themeblue disabled:opacity-30">
+              <span className="btn-inner group-hover:bg-transparent">Submit</span>
             </button>
-          ))}
-        </div>
-        <div className="mb-4">
-          <div className="flex justify-between mb-1">
-            <span className="text-xs text-gray-500">Stake</span>
-            <span className="text-xs text-gray-600">Bal: {balance.toLocaleString()}</span>
+          </>
+        )}
+
+        {step === 'confirm' && (
+          <div className="text-center py-4">
+            <div className="text-4xl mb-4">{FLAGS[pick === 'home' ? match.home : pick === 'away' ? match.away : match.home]}</div>
+            <p className="text-white text-lg mb-2">Are you sure you want to bet</p>
+            <p className="text-[#1DA1F2] text-2xl font-bold mb-1">{stake.toLocaleString()} WC Credits</p>
+            <p className="text-white text-lg mb-6">on {pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setStep('pick')} className="flex-1 py-3 rounded-[12px] border border-[#333] text-gray-400 hover:text-white transition">No</button>
+              <button onClick={handleConfirm} className="flex-1 py-3 rounded-[12px] bg-[#1DA1F2] text-white font-semibold hover:opacity-90 transition">Yes</button>
+            </div>
           </div>
-          <input type="number" value={stake} min={100} max={balance} step={100}
-            onChange={e=>setStake(Math.min(Math.max(100,Number(e.target.value)),balance))}
-            className="w-full bg-[#0d0d0d] border border-gray-700 text-white px-4 py-3 rounded-xl text-center text-xl font-bold focus:outline-none focus:border-blue-500"/>
-          <div className="flex gap-1.5 mt-2">
-            {[500,1000,5000,10000].map(a=>(
-              <button key={a} onClick={()=>setStake(Math.min(a,balance))}
-                className="flex-1 text-xs py-1.5 rounded-lg border border-gray-800 text-gray-500 hover:border-gray-600 hover:text-white transition">
-                {a>=1000?a/1000+'k':a}
-              </button>
-            ))}
+        )}
+
+        {step === 'success' && (
+          <div className="text-center py-8">
+            <div className="text-5xl mb-4">&#9989;</div>
+            <h3 className="text-xl font-bold text-white mb-2">Bet Successfully!!!</h3>
+            <p className="text-gray-400 text-sm mb-6">Your bet is live and locked in. Goodluck!</p>
+            <button onClick={handleConfirm}
+              className="btn-gradient group hover:from-green hover:to-themeblue">
+              <span className="btn-inner group-hover:bg-transparent">Ok</span>
+            </button>
           </div>
-        </div>
-        <button onClick={()=>onSubmit({matchId:match.id,pick,stake})} disabled={!pick||stake<100}
-          className="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-30">
-          Confirm · {stake.toLocaleString()} Credits
-        </button>
-        <p className="text-xs text-gray-700 text-center mt-2">No monetary value · Non-transferable</p>
+        )}
       </div>
     </div>
   );
@@ -163,87 +239,100 @@ function PredictionModal({ match, onClose, onSubmit, balance }) {
 
 export default function Predictions() {
   const { currentUser: user } = useCurrentUser();
-  const { evmAddress } = useEvmAddress();
+  const { evmAddress: cdpAddress } = useEvmAddress();
+  const [evmAddress, setEvmAddr] = useState(null);
+  useEffect(() => { const w = cdpAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet')); if (w) setEvmAddr(w); }, [cdpAddress]);
   const router = useRouter();
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [predictions, setPredictions] = useState({});
   const [balance, setBalance] = useState(50000);
+
+  useEffect(() => {
+    if (evmAddress) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+        .then(r => r.json())
+        .then(data => { if (data.free !== undefined) setBalance(data.free); })
+        .catch(err => console.error('Balance error:', err));
+    }
+  }, [evmAddress]);
+
+  useEffect(() => {
+    if (evmAddress) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+        .then(r => r.json())
+        .then(data => { if (data.free !== undefined) setBalance(data.free); })
+        .catch(err => console.error('Balance error:', err));
+    }
+  }, [evmAddress]);
+
+  useEffect(() => {
+    if (evmAddress) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`)
+        .then(r => r.json())
+        .then(data => { if (data.free !== undefined) setBalance(data.free); })
+        .catch(err => console.error('Balance error:', err));
+    }
+  }, [evmAddress]);
   const [activeGroup, setActiveGroup] = useState('A');
-  const [showUpcoming, setShowUpcoming] = useState(false);
 
-  useEffect(()=>{ if(!user) router.push('/promo'); },[user]);
+  useEffect(() => { if (!user) router.push('/promo'); }, [user]);
 
-  const handleSubmit = async ({matchId,pick,stake}) => {
+  const handleSubmit = async ({ matchId, pick, stake }) => {
     const wallet = evmAddress;
-    if (!wallet) { alert("Wallet not ready yet. Go back to /promo to register first."); return; }
+    if (!wallet) { alert('Wallet not ready. Go back to /promo first.'); return; }
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ walletAddress: wallet, matchId, pick, stake })
-        }
+        { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ walletAddress: wallet, matchId, pick, stake }) }
       );
       const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || 'Failed to submit prediction');
-        return;
-      }
-      setPredictions(prev=>({...prev,[matchId]:{pick,stake,status:data.status}}));
-      setBalance(prev=>prev-stake);
-      setSelectedMatch(null);
-      if (data.status === 'MATCHED') {
-        alert('Bet matched! Opponent found. Credits locked on-chain.');
-      }
+      if (!res.ok) { alert(data.message || 'Failed'); return; }
+      setPredictions(prev => ({ ...prev, [matchId]: { pick, stake, status: data.status } }));
+      setBalance(prev => prev - stake);
     } catch (err) {
-      console.error('Submit prediction error:', err);
-      // Fallback to local state if backend not available
-      setPredictions(prev=>({...prev,[matchId]:{pick,stake,status:'UNMATCHED'}}));
-      setBalance(prev=>prev-stake);
-      setSelectedMatch(null);
+      console.error('Submit error:', err);
+      setPredictions(prev => ({ ...prev, [matchId]: { pick, stake, status: 'UNMATCHED' } }));
+      setBalance(prev => prev - stake);
     }
   };
 
-  const displayed = showUpcoming
-    ? FIXTURES.filter(f=>new Date(f.kickoff)>new Date()).slice(0,8)
-    : FIXTURES.filter(f=>f.group===activeGroup);
+  const groupFixtures = FIXTURES.filter(f => f.group === activeGroup);
 
   return (
     <>
       <Head><title>Predictions - Global Soccer Challenge 2026</title></Head>
-      <div className="min-h-screen bg-[#0D0D0D] text-white">
-        <div className="max-w-lg mx-auto px-4 pt-6 pb-24">
-          <div className="flex justify-between items-start mb-5">
-            <div>
-              <button onClick={()=>router.push('/promo')} className="text-xs text-gray-600 hover:text-white mb-1 block">← Back</button>
-              <h1 className="text-xl font-bold">Predictions</h1>
-              <p className="text-gray-600 text-xs">48 Group Stage Matches · World Cup 2026</p>
-            </div>
-            <div className="text-right bg-[#1a1a1a] rounded-xl px-3 py-2 border border-gray-800">
-              <p className="text-xs text-gray-500">Balance</p>
-              <p className="text-lg font-bold text-green-400">{balance.toLocaleString()}</p>
-              <p className="text-xs text-gray-600">{Object.keys(predictions).length} picks made</p>
+      <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
+        <div className="max-w-6xl mx-auto px-4">
+
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-1">World Cup 2026 Predictions</h1>
+            <p className="text-gray-500">Pick your side. 48 Group Stage matches.</p>
+            <div className="mt-3 inline-block bg-[#1C1C1C] rounded-xl px-4 py-2">
+              <span className="text-gray-400 text-sm">WC Credits: </span>
+              <span className="text-[#1DA1F2] font-bold text-lg">{balance.toLocaleString()}</span>
+              <span className="text-gray-600 text-sm ml-3">{Object.keys(predictions).length} predictions</span>
             </div>
           </div>
-          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-            <button onClick={()=>setShowUpcoming(true)}
-              className={"flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition "+(showUpcoming?'bg-[#1DA1F2] border-[#1DA1F2] text-white':'border-gray-700 text-gray-500')}>
-              Upcoming
-            </button>
-            {GROUPS.map(g=>(
-              <button key={g} onClick={()=>{setActiveGroup(g);setShowUpcoming(false);}}
-                className={"flex-shrink-0 w-8 h-8 rounded-full text-xs font-bold border transition "+((!showUpcoming&&activeGroup===g)?'bg-[#1DA1F2] border-[#1DA1F2] text-white':'border-gray-700 text-gray-500 hover:border-gray-500')}>
-                {g}
-              </button>
+
+          <div className="flex justify-center gap-2 mb-8 flex-wrap">
+            {GROUPS.map(g => (
+              <button key={g} onClick={() => setActiveGroup(g)}
+                className={`w-10 h-10 rounded-full text-sm font-bold transition border ${
+                  activeGroup === g ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
+                }`}>{g}</button>
             ))}
           </div>
-          {displayed.map(m=>(
-            <MatchCard key={m.id} match={m} onPredict={setSelectedMatch} predictions={predictions}/>
-          ))}
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
+            {groupFixtures.map(m => (
+              <MatchCard key={m.id} match={m} prediction={predictions[m.id]} router={router} />
+            ))}
+          </div>
+
         </div>
       </div>
-      <PredictionModal match={selectedMatch} onClose={()=>setSelectedMatch(null)} onSubmit={handleSubmit} balance={balance}/>
+
     </>
   );
 }

@@ -42,6 +42,7 @@ export default function PromoPage() {
 
   // Debug CDP state
   useEffect(() => {
+    if (evmAddress && typeof window !== 'undefined') localStorage.setItem('wc_wallet', evmAddress);
     console.log('CDP Debug:', { user: !!user, evmAddress, isInitialized, isSignedIn });
   }, [user, evmAddress, isInitialized, isSignedIn]);
   const [email, setEmail] = useState('');
