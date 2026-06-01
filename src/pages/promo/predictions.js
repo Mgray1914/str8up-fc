@@ -247,9 +247,14 @@ export default function Predictions() {
   const [predictions, setPredictions] = useState({});
   const [balance, setBalance] = useState(50000);
 
+  const [predCount, setPredCount] = useState(0);
   useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
     if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
+        .then(r => r.json())
+        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
+        .catch(() => {});
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
@@ -257,9 +262,14 @@ export default function Predictions() {
     }
   }, [evmAddress]);
 
+  const [predCount, setPredCount] = useState(0);
   useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
     if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
+        .then(r => r.json())
+        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
+        .catch(() => {});
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
@@ -267,9 +277,14 @@ export default function Predictions() {
     }
   }, [evmAddress]);
 
+  const [predCount, setPredCount] = useState(0);
   useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
     if (wallet) {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
+        .then(r => r.json())
+        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
+        .catch(() => {});
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
         .then(r => r.json())
         .then(data => { if (data.free !== undefined) setBalance(data.free); })
@@ -314,7 +329,7 @@ export default function Predictions() {
             <div className="mt-3 inline-block bg-[#1C1C1C] rounded-xl px-4 py-2">
               <span className="text-gray-400 text-sm">WC Credits: </span>
               <span className="text-[#1DA1F2] font-bold text-lg">{balance.toLocaleString()}</span>
-              <span className="text-gray-600 text-sm ml-3">{Object.keys(predictions).length} predictions</span>
+              <span className="text-gray-600 text-sm ml-3">{predCount + Object.keys(predictions).length} predictions</span>
             </div>
           </div>
 
