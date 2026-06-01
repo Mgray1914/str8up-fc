@@ -262,8 +262,7 @@ export default function Predictions() {
     }
   }, [evmAddress]);
 
-  const [predCount, setPredCount] = useState(0);
-  useEffect(() => {
+    useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
     if (wallet) {
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
@@ -277,8 +276,7 @@ export default function Predictions() {
     }
   }, [evmAddress]);
 
-  const [predCount, setPredCount] = useState(0);
-  useEffect(() => {
+    useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
     if (wallet) {
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
