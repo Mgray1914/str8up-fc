@@ -49,7 +49,7 @@ export default function PromoPage() {
         .then(data => { if (data.free !== undefined) setRealBalance(data.free); })
         .catch(() => {});
     }
-  }, [evmAddress, registered]);
+  }, [evmAddress]);
 
   // Debug CDP state
   useEffect(() => {
