@@ -327,7 +327,7 @@ export default function Predictions() {
             <div className="mt-3 inline-block bg-[#1C1C1C] rounded-xl px-4 py-2">
               <span className="text-gray-400 text-sm">WC Credits: </span>
               <span className="text-[#1DA1F2] font-bold text-lg">{balance.toLocaleString()}</span>
-              <span className="text-gray-600 text-sm ml-3">{predCount + Object.keys(predictions).length} predictions</span>
+              <a href="/promo/profile" className="text-[#1DA1F2] text-sm ml-3 hover:underline">My Profile</a>
             </div>
           </div>
 
