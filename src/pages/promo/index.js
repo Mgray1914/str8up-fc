@@ -132,7 +132,7 @@ export default function PromoPage() {
           <p className="text-sm text-gray-500 uppercase tracking-widest mb-3">Str8Up Gaming Presents</p>
           <h1 className="text-4xl font-bold mb-2">Global Soccer Challenge</h1>
           <p className="text-gray-400 mb-2">Free-to-play peer-to-peer prediction contest</p>
-          <p className="text-green-400 font-semibold mb-8">$1,650 in prizes · World Cup 2026</p>
+          <p className="text-green-400 font-semibold mb-8">$1,400 in prizes · World Cup 2026</p>
 
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>
@@ -142,7 +142,17 @@ export default function PromoPage() {
               <li>Top predictors win real prizes at the end of each round</li>
             </ol>
           </div>
-
+<div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-left">
+            <p className="font-semibold text-white mb-3">Prize Breakdown</p>
+            <div className="space-y-2 text-gray-400">
+              <div className="flex justify-between"><span>Grand Prize</span><span className="text-green-400 font-semibold">$500</span></div>
+              <div className="flex justify-between"><span>Second Place</span><span className="text-green-400 font-semibold">$300</span></div>
+              <div className="flex justify-between"><span>Third Place</span><span className="text-green-400 font-semibold">$100</span></div>
+              <div className="flex justify-between"><span>Round Winners (5)</span><span className="text-green-400 font-semibold">$100 each</span></div>
+              <div className="flex justify-between border-t border-gray-700 pt-2 mt-2"><span className="text-white font-semibold">Total</span><span className="text-green-400 font-bold">$1,400</span></div>
+            </div>
+            <p className="text-xs text-gray-600 mt-3">Prizes fulfilled via digital Visa Gift Card. No crypto payments.</p>
+          </div>
           {!isInitialized ? (
             <div className="text-gray-500 text-sm py-8">Loading...</div>
           ) : user ? (

@@ -3,20 +3,19 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
 
-const FLAGS = {
-  "Mexico":"\u{1F1F2}\u{1F1FD}","South Africa":"\u{1F1FF}\u{1F1E6}","Korea Republic":"\u{1F1F0}\u{1F1F7}","Czechia":"\u{1F1E8}\u{1F1FF}",
-  "Canada":"\u{1F1E8}\u{1F1E6}","Bosnia & Herzegovina":"\u{1F1E7}\u{1F1E6}","Qatar":"\u{1F1F6}\u{1F1E6}","Switzerland":"\u{1F1E8}\u{1F1ED}",
-  "Brazil":"\u{1F1E7}\u{1F1F7}","Morocco":"\u{1F1F2}\u{1F1E6}","Haiti":"\u{1F1ED}\u{1F1F9}","Scotland":"\u{1F3F4}\u{E0067}\u{E0062}\u{E0073}\u{E0063}\u{E0074}\u{E007F}",
-  "USA":"\u{1F1FA}\u{1F1F8}","Paraguay":"\u{1F1F5}\u{1F1FE}","Australia":"\u{1F1E6}\u{1F1FA}","Turkiye":"\u{1F1F9}\u{1F1F7}",
-  "Germany":"\u{1F1E9}\u{1F1EA}","Curacao":"\u{1F1E8}\u{1F1FC}","Cote d'Ivoire":"\u{1F1E8}\u{1F1EE}","Ecuador":"\u{1F1EA}\u{1F1E8}",
-  "Netherlands":"\u{1F1F3}\u{1F1F1}","Japan":"\u{1F1EF}\u{1F1F5}","Sweden":"\u{1F1F8}\u{1F1EA}","Tunisia":"\u{1F1F9}\u{1F1F3}",
-  "Belgium":"\u{1F1E7}\u{1F1EA}","Egypt":"\u{1F1EA}\u{1F1EC}","IR Iran":"\u{1F1EE}\u{1F1F7}","New Zealand":"\u{1F1F3}\u{1F1FF}",
-  "Spain":"\u{1F1EA}\u{1F1F8}","Cabo Verde":"\u{1F1E8}\u{1F1FB}","Saudi Arabia":"\u{1F1F8}\u{1F1E6}","Uruguay":"\u{1F1FA}\u{1F1FE}",
-  "France":"\u{1F1EB}\u{1F1F7}","Senegal":"\u{1F1F8}\u{1F1F3}","Iraq":"\u{1F1EE}\u{1F1F6}","Norway":"\u{1F1F3}\u{1F1F4}",
-  "Argentina":"\u{1F1E6}\u{1F1F7}","Algeria":"\u{1F1E9}\u{1F1FF}","Austria":"\u{1F1E6}\u{1F1F9}","Jordan":"\u{1F1EF}\u{1F1F4}",
-  "Portugal":"\u{1F1F5}\u{1F1F9}","Congo DR":"\u{1F1E8}\u{1F1E9}","Uzbekistan":"\u{1F1FA}\u{1F1FF}","Colombia":"\u{1F1E8}\u{1F1F4}",
-  "England":"\u{1F3F4}\u{E0067}\u{E0062}\u{E0065}\u{E006E}\u{E0067}\u{E007F}","Croatia":"\u{1F1ED}\u{1F1F7}","Ghana":"\u{1F1EC}\u{1F1ED}","Panama":"\u{1F1F5}\u{1F1E6}"
+const FLAG_CODES = {"Mexico": "mx", "South Africa": "za", "Korea Republic": "kr", "Czechia": "cz", "Canada": "ca", "Bosnia & Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch", "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct", "USA": "us", "Paraguay": "py", "Australia": "au", "Turkiye": "tr", "Germany": "de", "Curacao": "cw", "Cote d'Ivoire": "ci", "Ecuador": "ec", "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be", "Egypt": "eg", "IR Iran": "ir", "New Zealand": "nz", "Spain": "es", "Cabo Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy", "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no", "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt", "Congo DR": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa"};
+
+const flagUrl = (team) => {
+  const code = FLAG_CODES[team];
+  if (!code) return null;
+  return `https://flagcdn.com/w80/${code}.png`;
 };
+
+function FlagImg({ team, size = 40 }) {
+  const url = flagUrl(team);
+  if (!url) return <span className="text-lg font-bold text-gray-500">{team.slice(0,3)}</span>;
+  return <img src={url} alt={team} width={size} height={size * 0.67} className="rounded-sm object-cover" style={{width: size, height: size * 0.67}} />;
+}
 
 const FIXTURES = [
   {id:"GS_A_1",home:"Mexico",away:"South Africa",group:"A",kickoff:"2026-06-11T19:00:00Z"},
@@ -94,66 +93,71 @@ const FIXTURES = [
 ];
 
 const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
-
-const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'});
+const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short', day:'2-digit'});
 const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
 
-function MatchCard({ match, prediction, router }) {
+function Toast({ message, type, onClose }) {
+  useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, []);
+  const bg = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-[#1DA1F2]';
+  return (
+    <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[100] ${bg} text-white px-6 py-3 rounded-xl shadow-lg text-sm font-medium animate-pulse max-w-sm text-center`}>
+      {message}
+    </div>
+  );
+}
+
+function MatchCard({ match, prediction, onPredict }) {
   const kickoff = new Date(match.kickoff);
   const isUpcoming = kickoff > new Date();
   return (
     <div className="text-white rounded-[20px] w-full shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5">
       <div className="flex justify-center items-center gap-4 mb-4">
-        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-2xl bg-[#1C1C1C]">
-          {FLAGS[match.home] || match.home.slice(0,2)}
+        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center bg-[#1C1C1C] overflow-hidden">
+          <FlagImg team={match.home} size={36} />
         </div>
-        <span className="text-[22px] font-regular">VS</span>
-        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-2xl bg-[#1C1C1C]">
-          {FLAGS[match.away] || match.away.slice(0,2)}
+        <span className="text-[22px] font-regular text-gray-500">VS</span>
+        <div className="h-[58px] w-[58px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center bg-[#1C1C1C] overflow-hidden">
+          <FlagImg team={match.away} size={36} />
         </div>
       </div>
       <div className="text-center mb-4">
-        <h2 className="text-[18px] font-semibold leading-tight">{match.home} vs {match.away}</h2>
-        <p className="text-xs text-gray-500 mt-1">Group {match.group}</p>
-      </div>
-      <div className="flex justify-between gap-3 mb-5">
-        <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
-          <p className="text-gray-400 text-[11px] mb-0.5">KICKOFF</p>
-          <p className="text-[15px]">{formatDate(match.kickoff)}</p>
-          <p className="text-sm text-gray-400">{formatTime(match.kickoff)}</p>
-        </div>
-        <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md text-center">
-          <p className="text-gray-400 text-[11px] mb-0.5">STATUS</p>
-          {prediction ? (
-            <p className="text-sm mt-1">
-              <span className={prediction.status === 'MATCHED' ? 'open' : 'unmatched'}>
-                {prediction.status === 'MATCHED' ? 'Matched' : 'Open'}
-              </span>
-            </p>
-          ) : (
-            <p className="text-[15px] text-gray-500">{isUpcoming ? 'Open' : 'Closed'}</p>
-          )}
-        </div>
+        <h2 className="text-[16px] sm:text-[18px] font-semibold leading-tight">{match.home} vs {match.away}</h2>
+        <p className="text-xs text-gray-500 mt-1">Group {match.group} &middot; {formatDate(match.kickoff)} &middot; {formatTime(match.kickoff)}</p>
       </div>
       {prediction ? (
-        <div className="text-center py-2 border border-green-800 rounded-[18px] bg-[#0a1f0a]">
-          <p className="text-green-400 text-sm">Predicted: {prediction.pick === 'home' ? match.home : prediction.pick === 'away' ? match.away : 'Draw'}</p>
-          <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} WC Credits</p>
+        <div className="text-center py-3 border border-green-800 rounded-[18px] bg-[#0a1f0a]">
+          <p className="text-green-400 text-sm font-semibold">{prediction.pick === 'home' ? match.home : prediction.pick === 'away' ? match.away : 'Draw'}</p>
+          <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} credits &middot; {prediction.status === 'MATCHED' ? '✅ Matched' : '⏳ Waiting'}</p>
         </div>
       ) : isUpcoming ? (
-        <button className="btn-gradient group hover:from-green hover:to-themeblue" onClick={() => router.push("/promo/match/" + match.id)}>
-          <span className="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent">Place a Wager</span>
+        <button onClick={() => onPredict(match)} className="btn-gradient group hover:from-green hover:to-themeblue w-full">
+          <span className="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent">Make Prediction</span>
         </button>
       ) : (
-        <button className="btn-gradient opacity-50 cursor-not-allowed">
-          <span className="btn-inner">Closed</span>
-        </button>
+        <div className="text-center py-3 border border-[#333] rounded-[18px]">
+          <p className="text-gray-600 text-sm">Closed</p>
+        </div>
       )}
+    </div>
+  );
+}function MatchCardSkeleton() {
+  return (
+    <div className="text-white rounded-[20px] w-full shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 animate-pulse">
+      <div className="flex justify-center items-center gap-4 mb-4">
+        <div className="h-[58px] w-[58px] rounded-full bg-[#1C1C1C]" />
+        <span className="text-[22px] text-gray-700">VS</span>
+        <div className="h-[58px] w-[58px] rounded-full bg-[#1C1C1C]" />
+      </div>
+      <div className="flex flex-col items-center gap-2 mb-4">
+        <div className="h-4 w-48 bg-[#1C1C1C] rounded" />
+        <div className="h-3 w-36 bg-[#1C1C1C] rounded" />
+      </div>
+      <div className="h-12 w-full bg-[#1C1C1C] rounded-[18px]" />
     </div>
   );
 }
 
-function WagerModal({ match, onClose, onSubmit, balance }) {
+function WagerModal({ match, onClose, onSubmit, balance, submitting }) {
   const [pick, setPick] = useState(null);
   const [stake, setStake] = useState(1000);
   const [step, setStep] = useState('pick');
@@ -162,24 +166,19 @@ function WagerModal({ match, onClose, onSubmit, balance }) {
   const handleConfirm = () => {
     if (step === 'pick') { setStep('confirm'); return; }
     if (step === 'confirm') { onSubmit({ matchId: match.id, pick, stake }); setStep('success'); return; }
-    if (step === 'success') { onClose(); setStep('pick'); }
+    if (step === 'success') { onClose(); setStep('pick'); setPick(null); }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center px-4">
-      <div className="bg-[#111] border border-[#333] rounded-[20px] p-6 w-full max-w-md relative shadow-[1px_-1px_4px_1px_#3d3c3ceb]">
-        <button onClick={() => { onClose(); setStep('pick'); }} className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">&times;</button>
+    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center px-4" onClick={() => { onClose(); setStep('pick'); setPick(null); }}>
+      <div className="bg-[#111] border border-[#333] rounded-[20px] p-6 w-full max-w-md relative shadow-[1px_-1px_4px_1px_#3d3c3ceb]" onClick={e => e.stopPropagation()}>
+        <button onClick={() => { onClose(); setStep('pick'); setPick(null); }} className="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">&times;</button>
 
         {step === 'pick' && (
           <>
-            <h3 className="text-center text-xl font-semibold text-white mb-2">Place a Wager</h3>
-            <p className="text-center text-gray-500 text-sm mb-6">Choose a team to place a prediction</p>
-            <div className="flex justify-center items-center gap-4 mb-6">
-              <div className="text-3xl">{FLAGS[match.home]}</div>
-              <span className="text-gray-500">VS</span>
-              <div className="text-3xl">{FLAGS[match.away]}</div>
-            </div>
-            <div className="flex gap-3 mb-6">
+            <h3 className="text-center text-xl font-semibold text-white mb-1">Place Prediction</h3>
+            <p className="text-center text-gray-500 text-sm mb-5">{match.home} vs {match.away}</p>
+            <div className="flex gap-3 mb-5">
               {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
                 <button key={o.v} onClick={() => setPick(o.v)}
                   className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
@@ -187,8 +186,11 @@ function WagerModal({ match, onClose, onSubmit, balance }) {
                   }`}>{o.l}</button>
               ))}
             </div>
-            <div className="mb-6">
-              <p className="text-gray-400 text-sm mb-2">Bet Amount <span className="float-right text-gray-600">Bal: {balance.toLocaleString()}</span></p>
+            <div className="mb-5">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-400">Stake</span>
+                <span className="text-gray-600">Bal: {balance.toLocaleString()}</span>
+              </div>
               <input type="number" value={stake} min={100} max={balance} step={100}
                 onChange={e => setStake(Math.min(Math.max(100, Number(e.target.value)), balance))}
                 className="w-full bg-[#1C1C1C] border border-[#333] text-white px-4 py-3 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#1DA1F2]" />
@@ -202,33 +204,37 @@ function WagerModal({ match, onClose, onSubmit, balance }) {
               </div>
             </div>
             <button onClick={handleConfirm} disabled={!pick || stake < 100}
-              className="btn-gradient group hover:from-green hover:to-themeblue disabled:opacity-30">
-              <span className="btn-inner group-hover:bg-transparent">Submit</span>
+              className="w-full py-3 rounded-[12px] bg-[#1DA1F2] text-white font-bold text-lg disabled:opacity-30 hover:opacity-90 transition">
+              Confirm &middot; {stake.toLocaleString()} Credits
             </button>
+            <p className="text-center text-gray-600 text-[11px] mt-2">No monetary value &middot; Non-transferable</p>
           </>
         )}
 
         {step === 'confirm' && (
           <div className="text-center py-4">
-            <div className="text-4xl mb-4">{FLAGS[pick === 'home' ? match.home : pick === 'away' ? match.away : match.home]}</div>
-            <p className="text-white text-lg mb-2">Are you sure you want to bet</p>
-            <p className="text-[#1DA1F2] text-2xl font-bold mb-1">{stake.toLocaleString()} WC Credits</p>
-            <p className="text-white text-lg mb-6">on {pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}?</p>
+            <div className="mb-4"><FlagImg team={pick === 'home' ? match.home : pick === 'away' ? match.away : match.home} size={60} /></div>
+            <p className="text-white text-lg mb-2">Confirm your prediction</p>
+            <p className="text-[#1DA1F2] text-2xl font-bold mb-1">{stake.toLocaleString()} Credits</p>
+            <p className="text-white mb-6">on {pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}</p>
             <div className="flex gap-4">
-              <button onClick={() => setStep('pick')} className="flex-1 py-3 rounded-[12px] border border-[#333] text-gray-400 hover:text-white transition">No</button>
-              <button onClick={handleConfirm} className="flex-1 py-3 rounded-[12px] bg-[#1DA1F2] text-white font-semibold hover:opacity-90 transition">Yes</button>
+              <button onClick={() => setStep('pick')} className="flex-1 py-3 rounded-[12px] border border-[#333] text-gray-400 hover:text-white transition">Back</button>
+              <button onClick={handleConfirm} disabled={submitting}
+                className="flex-1 py-3 rounded-[12px] bg-[#1DA1F2] text-white font-semibold hover:opacity-90 transition disabled:opacity-50">
+                {submitting ? 'Submitting...' : 'Confirm'}
+              </button>
             </div>
           </div>
         )}
 
         {step === 'success' && (
           <div className="text-center py-8">
-            <div className="text-5xl mb-4">&#9989;</div>
-            <h3 className="text-xl font-bold text-white mb-2">Bet Successfully!!!</h3>
-            <p className="text-gray-400 text-sm mb-6">Your bet is live and locked in. Goodluck!</p>
+            <div className="text-5xl mb-4">✅</div>
+            <h3 className="text-xl font-bold text-white mb-2">Prediction Placed!</h3>
+            <p className="text-gray-400 text-sm mb-6">Your prediction is live. Good luck!</p>
             <button onClick={handleConfirm}
-              className="btn-gradient group hover:from-green hover:to-themeblue">
-              <span className="btn-inner group-hover:bg-transparent">Ok</span>
+              className="w-full py-3 rounded-[12px] bg-[#1DA1F2] text-white font-semibold hover:opacity-90 transition">
+              Done
             </button>
           </div>
         )}
@@ -241,61 +247,72 @@ export default function Predictions() {
   const { currentUser: user } = useCurrentUser();
   const { evmAddress: cdpAddress } = useEvmAddress();
   const [evmAddress, setEvmAddr] = useState(null);
-  useEffect(() => { const w = cdpAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet')); if (w) setEvmAddr(w); }, [cdpAddress]);
   const router = useRouter();
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [predictions, setPredictions] = useState({});
   const [balance, setBalance] = useState(50000);
-
-  const [predCount, setPredCount] = useState(0);
-  useEffect(() => {
-    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-    if (wallet) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
-        .catch(() => {});
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.free !== undefined) setBalance(data.free); })
-        .catch(err => console.error('Balance error:', err));
-    }
-  }, [evmAddress]);
-
-    useEffect(() => {
-    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-    if (wallet) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
-        .catch(() => {});
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.free !== undefined) setBalance(data.free); })
-        .catch(err => console.error('Balance error:', err));
-    }
-  }, [evmAddress]);
-
-    useEffect(() => {
-    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-    if (wallet) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/user/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.predictionCount) setPredCount(data.predictionCount); })
-        .catch(() => {});
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.free !== undefined) setBalance(data.free); })
-        .catch(err => console.error('Balance error:', err));
-    }
-  }, [evmAddress]);
   const [activeGroup, setActiveGroup] = useState('A');
+  const [toast, setToast] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { if (!user) router.push('/promo'); }, [user]);
+  useEffect(() => {
+    const w = cdpAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+    if (w) setEvmAddr(w);
+  }, [cdpAddress]);
+
+  // Fetch balance and predictions (once)
+  useEffect(() => {
+    const wallet = evmAddress;
+    if (!wallet) { setLoading(false); return; }
+    Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r => r.json()).catch(() => null),
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/${wallet}`).then(r => r.json()).catch(() => null),
+    ]).then(([bal, preds]) => {
+      if (bal && bal.free !== undefined) setBalance(bal.free);
+      if (preds && preds.predictions) {
+        const map = {};
+        preds.predictions.forEach(p => { map[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status }; });
+        setPredictions(map);
+      }
+      setLoading(false);
+    });
+  }, [evmAddress]);
+
+  useEffect(() => { if (!user && typeof window !== 'undefined') router.push('/promo'); }, [user]);
+// Poll for status changes (matched/settled)
+  useEffect(() => {
+    const wallet = evmAddress;
+    if (!wallet || loading) return;
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/${wallet}`);
+        const data = await res.json();
+        if (data?.predictions) {
+          const updated = {};
+          data.predictions.forEach(p => {
+            const prev = predictions[p.matchId];
+            if (prev && prev.status === 'UNMATCHED' && p.status === 'MATCHED') {
+              const fix = FIXTURES.find(f => f.id === p.matchId);
+              showToast(`Prediction matched! ${fix ? fix.home + ' vs ' + fix.away : p.matchId}`, 'success');
+            }
+            if (prev && prev.status !== 'SETTLED' && p.status === 'SETTLED') {
+              showToast(`Bet settled! Check your balance.`, 'info');
+            }
+            updated[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status };
+          });
+          setPredictions(updated);
+        }
+      } catch (_) {}
+    }, 30000);
+    return () => clearInterval(poll);
+  }, [evmAddress, loading, predictions]);
+  const showToast = (message, type = 'info') => setToast({ message, type });
 
   const handleSubmit = async ({ matchId, pick, stake }) => {
     const wallet = evmAddress;
-    if (!wallet) { alert('Wallet not ready. Go back to /promo first.'); return; }
+    if (!wallet) { showToast('Wallet not ready. Go back to /promo first.', 'error'); return; }
+    setSubmitting(true);
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions`,
@@ -303,52 +320,64 @@ export default function Predictions() {
           body: JSON.stringify({ walletAddress: wallet, matchId, pick, stake }) }
       );
       const data = await res.json();
-      if (!res.ok) { alert(data.message || 'Failed'); return; }
-      setPredictions(prev => ({ ...prev, [matchId]: { pick, stake, status: data.status } }));
+      if (!res.ok) { showToast(data.message || 'Failed to place prediction', 'error'); return; }
+      setPredictions(prev => ({ ...prev, [matchId]: { pick, stake, status: data.status || 'UNMATCHED' } }));
       setBalance(prev => prev - stake);
+      showToast('Prediction placed!', 'success');
     } catch (err) {
       console.error('Submit error:', err);
-      setPredictions(prev => ({ ...prev, [matchId]: { pick, stake, status: 'UNMATCHED' } }));
-      setBalance(prev => prev - stake);
+      showToast('Network error. Try again.', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const groupFixtures = FIXTURES.filter(f => f.group === activeGroup);
+  const predCount = Object.keys(predictions).length;
 
   return (
     <>
       <Head><title>Predictions - Global Soccer Challenge 2026</title></Head>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-4">
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-1">World Cup 2026 Predictions</h1>
-            <p className="text-gray-500">Pick your side. 48 Group Stage matches.</p>
-            <div className="mt-3 inline-block bg-[#1C1C1C] rounded-xl px-4 py-2">
-              <span className="text-gray-400 text-sm">WC Credits: </span>
-              <span className="text-[#1DA1F2] font-bold text-lg">{balance.toLocaleString()}</span>
-              <a href="/promo/profile" className="text-[#1DA1F2] text-sm ml-3 hover:underline">My Profile</a>
+          <div className="text-center mb-6">
+            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{FIXTURES.length} Group Stage Matches &middot; World Cup 2026</p>
+            <div className="flex justify-center items-center gap-3 flex-wrap">
+              <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
+                <span className="text-gray-400">Balance: </span>
+                <span className="text-[#1DA1F2] font-bold">{loading ? <span className="inline-block w-16 h-4 bg-[#1C1C1C] rounded animate-pulse align-middle" /> : balance.toLocaleString()}</span>
+              </span>
+              <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
+                <span className="text-gray-400">Picks: </span>
+                <span className="text-white font-bold">{predCount}</span>
+              </span>
             </div>
           </div>
 
-          <div className="flex justify-center gap-2 mb-8 flex-wrap">
+          <div className="flex justify-center gap-1.5 sm:gap-2 mb-8 flex-wrap px-2">
             {GROUPS.map(g => (
               <button key={g} onClick={() => setActiveGroup(g)}
-                className={`w-10 h-10 rounded-full text-sm font-bold transition border ${
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full text-sm font-bold transition border ${
                   activeGroup === g ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
                 }`}>{g}</button>
             ))}
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
-            {groupFixtures.map(m => (
-              <MatchCard key={m.id} match={m} prediction={predictions[m.id]} router={router} />
-            ))}
-          </div>
-
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
+              {[...Array(6)].map((_, i) => <MatchCardSkeleton key={i} />)}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
+              {groupFixtures.map(m => (
+                <MatchCard key={m.id} match={m} prediction={predictions[m.id]} onPredict={setSelectedMatch} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
+      <WagerModal match={selectedMatch} onClose={() => setSelectedMatch(null)} onSubmit={handleSubmit} balance={balance} submitting={submitting} />
     </>
   );
 }
