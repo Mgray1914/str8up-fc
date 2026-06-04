@@ -3,20 +3,19 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
 
-const FLAGS = {
-  "Mexico":"\u{1F1F2}\u{1F1FD}","South Africa":"\u{1F1FF}\u{1F1E6}","Korea Republic":"\u{1F1F0}\u{1F1F7}","Czechia":"\u{1F1E8}\u{1F1FF}",
-  "Canada":"\u{1F1E8}\u{1F1E6}","Bosnia & Herzegovina":"\u{1F1E7}\u{1F1E6}","Qatar":"\u{1F1F6}\u{1F1E6}","Switzerland":"\u{1F1E8}\u{1F1ED}",
-  "Brazil":"\u{1F1E7}\u{1F1F7}","Morocco":"\u{1F1F2}\u{1F1E6}","Haiti":"\u{1F1ED}\u{1F1F9}","Scotland":"\u{1F3F4}",
-  "USA":"\u{1F1FA}\u{1F1F8}","Paraguay":"\u{1F1F5}\u{1F1FE}","Australia":"\u{1F1E6}\u{1F1FA}","Turkiye":"\u{1F1F9}\u{1F1F7}",
-  "Germany":"\u{1F1E9}\u{1F1EA}","Curacao":"\u{1F1E8}\u{1F1FC}","Cote d'Ivoire":"\u{1F1E8}\u{1F1EE}","Ecuador":"\u{1F1EA}\u{1F1E8}",
-  "Netherlands":"\u{1F1F3}\u{1F1F1}","Japan":"\u{1F1EF}\u{1F1F5}","Sweden":"\u{1F1F8}\u{1F1EA}","Tunisia":"\u{1F1F9}\u{1F1F3}",
-  "Belgium":"\u{1F1E7}\u{1F1EA}","Egypt":"\u{1F1EA}\u{1F1EC}","IR Iran":"\u{1F1EE}\u{1F1F7}","New Zealand":"\u{1F1F3}\u{1F1FF}",
-  "Spain":"\u{1F1EA}\u{1F1F8}","Cabo Verde":"\u{1F1E8}\u{1F1FB}","Saudi Arabia":"\u{1F1F8}\u{1F1E6}","Uruguay":"\u{1F1FA}\u{1F1FE}",
-  "France":"\u{1F1EB}\u{1F1F7}","Senegal":"\u{1F1F8}\u{1F1F3}","Iraq":"\u{1F1EE}\u{1F1F6}","Norway":"\u{1F1F3}\u{1F1F4}",
-  "Argentina":"\u{1F1E6}\u{1F1F7}","Algeria":"\u{1F1E9}\u{1F1FF}","Austria":"\u{1F1E6}\u{1F1F9}","Jordan":"\u{1F1EF}\u{1F1F4}",
-  "Portugal":"\u{1F1F5}\u{1F1F9}","Congo DR":"\u{1F1E8}\u{1F1E9}","Uzbekistan":"\u{1F1FA}\u{1F1FF}","Colombia":"\u{1F1E8}\u{1F1F4}",
-  "England":"\u{1F3F4}","Croatia":"\u{1F1ED}\u{1F1F7}","Ghana":"\u{1F1EC}\u{1F1ED}","Panama":"\u{1F1F5}\u{1F1E6}"
+const FLAG_CODES = {"Mexico": "mx", "South Africa": "za", "Korea Republic": "kr", "Czechia": "cz", "Canada": "ca", "Bosnia & Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch", "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct", "USA": "us", "Paraguay": "py", "Australia": "au", "Turkiye": "tr", "Germany": "de", "Curacao": "cw", "Cote d'Ivoire": "ci", "Ecuador": "ec", "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be", "Egypt": "eg", "IR Iran": "ir", "New Zealand": "nz", "Spain": "es", "Cabo Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy", "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no", "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt", "Congo DR": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa"};
+
+const flagUrl = (team) => {
+  const code = FLAG_CODES[team];
+  if (!code) return null;
+  return `https://flagcdn.com/w80/${code}.png`;
 };
+
+function FlagImg({ team, size = 40 }) {
+  const url = flagUrl(team);
+  if (!url) return <span className="text-lg font-bold text-gray-500">{team.slice(0,3)}</span>;
+  return <img src={url} alt={team} width={size} height={size * 0.67} className="rounded-sm object-cover" style={{width: size, height: size * 0.67}} />;
+}
 
 const FIXTURES = [
   {id:"GS_A_1",home:"Mexico",away:"South Africa",group:"A",kickoff:"2026-06-11T19:00:00Z"},
@@ -215,11 +214,11 @@ export default function MatchDetail() {
           <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-8 mb-8">
             <div className="flex justify-center items-center gap-6 mb-4">
               <div className="h-[72px] w-[72px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-3xl bg-[#1C1C1C]">
-                {FLAGS[match.home] || match.home.slice(0,2)}
+                <FlagImg team={match.home} size={48} />
               </div>
               <span className="text-[28px] font-regular text-gray-500">VS</span>
               <div className="h-[72px] w-[72px] border border-[#333] shadow-[0px_0px_15px_0px_#8C8C8C] rounded-full flex items-center justify-center text-3xl bg-[#1C1C1C]">
-                {FLAGS[match.away] || match.away.slice(0,2)}
+                <FlagImg team={match.away} size={48} />
               </div>
             </div>
             <h1 className="text-center text-xl font-semibold mb-1">{match.home} vs {match.away}</h1>
@@ -403,7 +402,7 @@ export default function MatchDetail() {
 
             {step === 'confirm' && (
               <div className="text-center py-4">
-                <div className="text-4xl mb-4">{FLAGS[pick === 'home' ? match.home : pick === 'away' ? match.away : match.home]}</div>
+                <div className="text-4xl mb-4"><FlagImg team={pick === 'home' ? match.home : pick === 'away' ? match.away : match.home} size={60} />
                 <p className="text-white text-lg mb-1">Are you sure, you want to</p>
                 <p className="text-white text-lg mb-1">bet <span className="text-[#1DA1F2] font-bold">{stake.toLocaleString()} WC Credits</span></p>
                 <p className="text-white text-lg mb-6">on <span className="font-bold">{pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}</span>?</p>
