@@ -120,8 +120,8 @@ function MatchCard({ match, prediction, onPredict }) {
           <FlagImg team={match.away} size={36} />
         </div>
       </div>
-      <div className="text-center mb-4">
-        <h2 className="text-[16px] sm:text-[18px] font-semibold leading-tight">{match.home} vs {match.away}</h2>
+      <div className="text-center mb-4 cursor-pointer" onClick={() => window.location.href = `/promo/match/${match.id}`}>
+        <h2 className="text-[16px] sm:text-[18px] font-semibold leading-tight hover:text-[#1DA1F2] transition">{match.home} vs {match.away}</h2>
         <p className="text-xs text-gray-500 mt-1">Group {match.group} &middot; {formatDate(match.kickoff)} &middot; {formatTime(match.kickoff)}</p>
       </div>
       {prediction ? (
