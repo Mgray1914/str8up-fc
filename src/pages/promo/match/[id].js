@@ -402,7 +402,7 @@ export default function MatchDetail() {
 
             {step === 'confirm' && (
               <div className="text-center py-4">
-                <div className="text-4xl mb-4"><FlagImg team={pick === 'home' ? match.home : pick === 'away' ? match.away : match.home} size={60} />
+                <div className="mb-4"><FlagImg team={pick === 'home' ? match.home : pick === 'away' ? match.away : match.home} size={60} /></div>
                 <p className="text-white text-lg mb-1">Are you sure, you want to</p>
                 <p className="text-white text-lg mb-1">bet <span className="text-[#1DA1F2] font-bold">{stake.toLocaleString()} WC Credits</span></p>
                 <p className="text-white text-lg mb-6">on <span className="font-bold">{pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}</span>?</p>

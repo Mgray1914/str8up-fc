@@ -106,7 +106,7 @@ function Toast({ message, type, onClose }) {
   );
 }
 
-function MatchCard({ match, prediction, onPredict }) {
+function MatchCard({ match, prediction, onPredict, matchStatus }) {
   const kickoff = new Date(match.kickoff);
   const isUpcoming = kickoff > new Date();
   return (
@@ -125,9 +125,14 @@ function MatchCard({ match, prediction, onPredict }) {
         <p className="text-xs text-gray-500 mt-1">Group {match.group} &middot; {formatDate(match.kickoff)} &middot; {formatTime(match.kickoff)}</p>
       </div>
       {prediction ? (
-        <div className="text-center py-3 border border-green-800 rounded-[18px] bg-[#0a1f0a]">
+        <div className={`text-center py-3 rounded-[18px] ${prediction.status === 'SETTLED' && prediction.outcome === 'WIN' ? 'border border-yellow-600 bg-[#1a1a0a]' : prediction.status === 'SETTLED' && prediction.outcome === 'LOSS' ? 'border border-red-800 bg-[#1a0a0a]' : 'border border-green-800 bg-[#0a1f0a]'}`}>
           <p className="text-green-400 text-sm font-semibold">{prediction.pick === 'home' ? match.home : prediction.pick === 'away' ? match.away : 'Draw'}</p>
           <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} credits &middot; {prediction.status === 'MATCHED' ? '✅ Matched' : '⏳ Waiting'}</p>
+        </div>
+) : matchStatus?.status === 'COMPLETED' ? (
+        <div className="text-center py-3 border border-[#333] rounded-[18px]">
+          <p className="text-gray-400 text-sm">Completed</p>
+          <p className="text-xs text-gray-600">{matchStatus.winner === 'home' ? match.home : matchStatus.winner === 'away' ? match.away : 'Draw'} won</p>
         </div>
       ) : isUpcoming ? (
         <button onClick={() => onPredict(match)} className="btn-gradient group hover:from-green hover:to-themeblue w-full">
@@ -255,6 +260,7 @@ export default function Predictions() {
   const [toast, setToast] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [matchStatuses, setMatchStatuses] = useState({});
 
   useEffect(() => {
     const w = cdpAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
@@ -268,7 +274,8 @@ export default function Predictions() {
     Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r => r.json()).catch(() => null),
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/${wallet}`).then(r => r.json()).catch(() => null),
-    ]).then(([bal, preds]) => {
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).catch(() => null),
+    ]).then(([bal, preds, matchData]) => {
       if (bal && bal.free !== undefined) setBalance(bal.free);
       if (preds && preds.predictions) {
         const map = {};
@@ -278,7 +285,11 @@ export default function Predictions() {
       setLoading(false);
     });
   }, [evmAddress]);
-
+if (matchData && matchData.matches) {
+        const sMap = {};
+        matchData.matches.forEach(m => { sMap[m.matchId] = { status: m.status, winner: m.winner }; });
+        setMatchStatuses(sMap);
+      }
   useEffect(() => { if (!user && typeof window !== 'undefined') router.push('/promo'); }, [user]);
 // Poll for status changes (matched/settled)
   useEffect(() => {
@@ -371,7 +382,7 @@ export default function Predictions() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
               {groupFixtures.map(m => (
-                <MatchCard key={m.id} match={m} prediction={predictions[m.id]} onPredict={setSelectedMatch} />
+                <MatchCard key={m.id} match={m} prediction={predictions[m.id]} onPredict={setSelectedMatch} matchStatus={matchStatuses[m.id]} />
               ))}
             </div>
           )}
