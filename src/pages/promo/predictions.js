@@ -279,7 +279,12 @@ export default function Predictions() {
       if (bal && bal.free !== undefined) setBalance(bal.free);
       if (preds && preds.predictions) {
         const map = {};
-        preds.predictions.forEach(p => { map[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status }; });
+        preds.predictions.forEach(p => {
+          const prev = map[p.matchId];
+          if (!prev || p.status === 'SETTLED' || p.status === 'MATCHED' || !prev.status || prev.status === 'CANCELLED') {
+            map[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status, outcome: p.outcome };
+          }
+        });
         setPredictions(map);
       }
       setLoading(false);
