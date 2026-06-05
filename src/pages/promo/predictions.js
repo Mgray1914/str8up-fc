@@ -127,7 +127,7 @@ function MatchCard({ match, prediction, onPredict, matchStatus }) {
       {prediction ? (
         <div className={`text-center py-3 rounded-[18px] ${prediction.status === 'SETTLED' && prediction.outcome === 'WIN' ? 'border border-yellow-600 bg-[#1a1a0a]' : prediction.status === 'SETTLED' && prediction.outcome === 'LOSS' ? 'border border-red-800 bg-[#1a0a0a]' : 'border border-green-800 bg-[#0a1f0a]'}`}>
           <p className="text-green-400 text-sm font-semibold">{prediction.pick === 'home' ? match.home : prediction.pick === 'away' ? match.away : 'Draw'}</p>
-          <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} credits &middot; {prediction.status === 'MATCHED' ? '✅ Matched' : '⏳ Waiting'}</p>
+          <p className="text-xs text-gray-500">{prediction.stake?.toLocaleString()} credits &middot; {prediction.status === 'SETTLED' ? (prediction.outcome === 'WIN' ? '🏆 Won' : '❌ Lost') : prediction.status === 'CANCELLED' ? '↩️ Returned' : prediction.status === 'MATCHED' ? '✅ Matched' : '⏳ Waiting'}</p>
         </div>
 ) : matchStatus?.status === 'COMPLETED' ? (
         <div className="text-center py-3 border border-[#333] rounded-[18px]">
