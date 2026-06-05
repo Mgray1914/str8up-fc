@@ -287,14 +287,14 @@ export default function Predictions() {
         });
         setPredictions(map);
       }
-      setLoading(false);
-    });
-  }, [evmAddress]);
 if (matchData && matchData.matches) {
         const sMap = {};
         matchData.matches.forEach(m => { sMap[m.matchId] = { status: m.status, winner: m.winner }; });
         setMatchStatuses(sMap);
       }
+      setLoading(false);
+    });
+  }, [evmAddress]);
   useEffect(() => { if (!user && typeof window !== 'undefined') router.push('/promo'); }, [user]);
 // Poll for status changes (matched/settled)
   useEffect(() => {
