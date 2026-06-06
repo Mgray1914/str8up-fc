@@ -124,6 +124,15 @@ export default function PromoPage() {
       <Head>
         <title>Global Soccer Challenge — Str8Up Gaming</title>
         <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting World Cup 2026 match outcomes." />
+        <meta property="og:title" content="Global Soccer Challenge — Str8Up Gaming" />
+        <meta property="og:description" content="Free-to-play peer-to-peer prediction contest. $1,400 in prizes. World Cup 2026." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://str8upgaming.com/promo" />
+        <meta property="og:image" content="https://str8upgaming.com/og-promo.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Global Soccer Challenge — Str8Up Gaming" />
+        <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. World Cup 2026." />
+        <meta name="twitter:image" content="https://str8upgaming.com/og-promo.png" />
       </Head>
 
       <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center px-4 pt-28 pb-16">
