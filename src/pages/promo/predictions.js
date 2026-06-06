@@ -366,7 +366,9 @@ if (matchData && matchData.matches) {
   <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. World Cup 2026." />
   <meta name="twitter:image" content="https://str8upgaming.com/og-promo.png" />
 </Head>
-
+{toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-6">
             <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{FIXTURES.length} Group Stage Matches &middot; World Cup 2026</p>
             <div className="flex justify-center items-center gap-3 flex-wrap">
