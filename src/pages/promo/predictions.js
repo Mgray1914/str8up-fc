@@ -384,6 +384,10 @@ if (matchData && matchData.matches) {
                 <span className="text-gray-400">📊 </span>
                 <span className="text-white font-bold">Profile</span>
               </span>
+                <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm cursor-pointer hover:bg-[#252525] transition" onClick={() => router.push('/promo/leaderboard')}>
+                <span className="text-gray-400">🏆 </span>
+                <span className="text-white font-bold">Leaderboard</span>
+              </span>
             </div>
           </div>
 
