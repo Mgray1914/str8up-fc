@@ -345,7 +345,7 @@ export default function MatchDetail() {
                             <p className="text-xs text-gray-500">{w.stake?.toLocaleString()} Credits &middot; {w.pick === 'home' ? match.home : w.pick === 'away' ? match.away : 'Draw'}</p>
                           </div>
                         </div>
-                        <span className="open text-xs">Matched</span>
+                        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${w.status === 'SETTLED' ? (w.outcome === 'WIN' ? 'bg-yellow-900 text-yellow-400' : 'bg-red-900 text-red-400') : 'bg-green-900 text-green-400'}`}>{w.status === 'SETTLED' ? (w.outcome === 'WIN' ? 'Won' : 'Lost') : 'Matched'}</span>
                       </div>
                     ))}
                   </div>
