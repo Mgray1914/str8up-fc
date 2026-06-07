@@ -110,6 +110,7 @@ export default function MatchDetail() {
   const [step, setStep] = useState('pick');
   const [openWagers, setOpenWagers] = useState([]);
   const [matchedWagers, setMatchedWagers] = useState([]);
+  const [matchStatus, setMatchStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchTarget, setMatchTarget] = useState(null);
   const [matching, setMatching] = useState(false);
@@ -138,6 +139,10 @@ export default function MatchDetail() {
 
   useEffect(() => {
     if (!id) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).then(data => {
+      const m = data.matches?.find(m => m.matchId === id);
+      if (m) setMatchStatus(m.status);
+    }).catch(() => {});
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/match/${id}`)
       .then(r => r.json())
       .then(data => {
@@ -249,7 +254,7 @@ export default function MatchDetail() {
             </div>
 
             {/* Place a Wager button */}
-            {isUpcoming && (
+            {isUpcoming && matchStatus !== 'COMPLETED' && (
               <div className="max-w-sm mx-auto">
                 <button onClick={() => {
                   const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
