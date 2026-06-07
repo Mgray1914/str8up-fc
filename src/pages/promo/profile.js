@@ -111,12 +111,13 @@ export default function PromoProfile() {
                         )}
                       </div>
                       <div className="text-right">
-                        <span className={`text-xs px-3 py-1 rounded-full ${
+                        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                          p.status === 'SETTLED' && p.outcome === 'WIN' ? 'bg-yellow-900 text-yellow-400' :
+                          p.status === 'SETTLED' && p.outcome === 'LOSS' ? 'bg-red-900 text-red-400' :
                           p.status === 'MATCHED' ? 'bg-green-900 text-green-400' :
-                          p.status === 'SETTLED' ? 'bg-purple-900 text-purple-400' :
-                          p.status === 'CANCELLED' ? 'bg-red-900 text-red-400' :
+                          p.status === 'CANCELLED' ? 'bg-gray-800 text-gray-400' :
                           'bg-cyan-900 text-cyan-400'
-                        }`}>{p.status}</span>
+                        }`}>{p.status === 'SETTLED' ? (p.outcome === 'WIN' ? 'Won' : 'Lost') : p.status === 'CANCELLED' ? 'Returned' : p.status === 'MATCHED' ? 'Matched' : 'Waiting'}</span>
                         {p.txHash && (
                           <a href={`https://basescan.org/tx/${p.txHash}`} target="_blank" rel="noopener noreferrer"
                             className="block text-gray-600 text-xs mt-1 hover:text-[#1DA1F2]" onClick={e => e.stopPropagation()}>View on BaseScan</a>
