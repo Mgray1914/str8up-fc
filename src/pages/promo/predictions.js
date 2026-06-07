@@ -315,7 +315,7 @@ if (matchData && matchData.matches) {
             if (prev && prev.status !== 'SETTLED' && p.status === 'SETTLED') {
               showToast(`Bet settled! Check your balance.`, 'info');
             }
-            updated[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status };
+            updated[p.matchId] = { pick: p.pick, stake: p.stake, status: p.status, outcome: p.outcome };
           });
           setPredictions(updated);
         }
