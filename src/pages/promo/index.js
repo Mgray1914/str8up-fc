@@ -12,6 +12,29 @@ import {
   useCreateEvmEoaAccount
 } from '@coinbase/cdp-hooks';
 
+function Countdown() {
+  const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
+  useEffect(() => {
+    const target = new Date('2026-06-11T19:00:00Z').getTime();
+    const update = () => {
+      const diff = Math.max(0, target - Date.now());
+      setTime({ d: Math.floor(diff/86400000), h: Math.floor((diff%86400000)/3600000), m: Math.floor((diff%3600000)/60000), s: Math.floor((diff%60000)/1000) });
+    };
+    update();
+    const t = setInterval(update, 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="flex justify-center gap-4">
+      {[['d','Days'],['h','Hrs'],['m','Min'],['s','Sec']].map(([k,l]) => (
+        <div key={k} className="text-center">
+          <p className="text-3xl font-bold text-white">{String(time[k]).padStart(2,'0')}</p>
+          <p className="text-gray-500 text-xs">{l}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 export default function PromoPage() {
   const { signInWithEmail, isPending: sendPending } = useSignInWithEmail();
   const { verifyEmailOTP, isPending: verifyPending } = useVerifyEmailOTP();
@@ -142,6 +165,10 @@ export default function PromoPage() {
           <h1 className="text-4xl font-bold mb-2">Global Soccer Challenge</h1>
           <p className="text-gray-400 mb-2">Free-to-play peer-to-peer prediction contest</p>
           <p className="text-green-400 font-semibold mb-8">$1,400 in prizes · World Cup 2026</p>
+        <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-center">
+            <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">First match kicks off in</p>
+            <Countdown />
+          </div>
 
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>
