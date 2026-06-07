@@ -111,6 +111,7 @@ export default function MatchDetail() {
   const [openWagers, setOpenWagers] = useState([]);
   const [matchedWagers, setMatchedWagers] = useState([]);
   const [matchStatus, setMatchStatus] = useState(null);
+  const [matchWinner, setMatchWinner] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchTarget, setMatchTarget] = useState(null);
   const [matching, setMatching] = useState(false);
@@ -141,7 +142,7 @@ export default function MatchDetail() {
     if (!id) return;
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).then(data => {
       const m = data.matches?.find(m => m.matchId === id);
-      if (m) setMatchStatus(m.status);
+      if (m) { setMatchStatus(m.status); setMatchWinner(m.winner); }
     }).catch(() => {});
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/match/${id}`)
       .then(r => r.json())
@@ -229,42 +230,51 @@ export default function MatchDetail() {
             <h1 className="text-center text-xl font-semibold mb-1">{match.home} vs {match.away}</h1>
             <p className="text-center text-gray-500 text-sm mb-6">Group {match.group} &middot; World Cup 2026</p>
 
-            {/* Team Selection */}
-            <div className="flex gap-3 mb-6 max-w-md mx-auto">
-              {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
-                <button key={o.v} onClick={() => setPick(o.v)}
-                  className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
-                    pick === o.v ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-400 hover:border-[#555]'
-                  }`}>{o.l}</button>
-              ))}
-            </div>
-
-            {/* Date boxes */}
-            <div className="flex justify-center gap-4 mb-6 max-w-md mx-auto">
-              <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
-                <p className="text-gray-400 text-[11px]">KICKOFF</p>
-                <p className="text-[16px]">{formatDate(match.kickoff)}</p>
-                <p className="text-sm text-gray-400">{formatTime(match.kickoff)}</p>
+            {matchStatus === 'COMPLETED' ? (
+              <div className="text-center mb-6 max-w-md mx-auto">
+                <div className="bg-[#0a1f0a] border border-green-800 rounded-[16px] p-6">
+                  <p className="text-gray-400 text-sm mb-2">Match Completed</p>
+                  <p className="text-2xl font-bold text-green-400">{matchWinner === 'home' ? match.home : matchWinner === 'away' ? match.away : 'Draw'} {matchWinner !== 'draw' ? 'Won' : ''}</p>
+                </div>
               </div>
-              <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
-                <p className="text-gray-400 text-[11px]">GROUP</p>
-                <p className="text-[16px]">Group {match.group}</p>
-                <p className="text-sm text-gray-400">Group Stage</p>
-              </div>
-            </div>
-
-            {/* Place a Wager button */}
-            {isUpcoming && matchStatus !== 'COMPLETED' && (
-              <div className="max-w-sm mx-auto">
-                <button onClick={() => {
-                  const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-                  if (wallet) fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r=>r.json()).then(d=>{if(d.free!==undefined)setBalance(d.free)});
-                  setShowWager(true);
-                }} disabled={!pick}
-                  className="btn-gradient group hover:from-green hover:to-themeblue disabled:opacity-30 disabled:cursor-not-allowed">
-                  <span className="btn-inner group-hover:bg-transparent">Place a Wager</span>
-                </button>
-              </div>
+            ) : (
+              <>
+                {/* Team Selection */}
+                <div className="flex gap-3 mb-6 max-w-md mx-auto">
+                  {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
+                    <button key={o.v} onClick={() => setPick(o.v)}
+                      className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
+                        pick === o.v ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-400 hover:border-[#555]'
+                      }`}>{o.l}</button>
+                  ))}
+                </div>
+                {/* Date boxes */}
+                <div className="flex justify-center gap-4 mb-6 max-w-md mx-auto">
+                  <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
+                    <p className="text-gray-400 text-[11px]">KICKOFF</p>
+                    <p className="text-[16px]">{formatDate(match.kickoff)}</p>
+                    <p className="text-sm text-gray-400">{formatTime(match.kickoff)}</p>
+                  </div>
+                  <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
+                    <p className="text-gray-400 text-[11px]">GROUP</p>
+                    <p className="text-[16px]">Group {match.group}</p>
+                    <p className="text-sm text-gray-400">Group Stage</p>
+                  </div>
+                </div>
+                {/* Place a Wager button */}
+                {isUpcoming && (
+                  <div className="max-w-sm mx-auto">
+                    <button onClick={() => {
+                      const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
+                      if (wallet) fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r=>r.json()).then(d=>{if(d.free!==undefined)setBalance(d.free)});
+                      setShowWager(true);
+                    }} disabled={!pick}
+                      className="btn-gradient group hover:from-green hover:to-themeblue disabled:opacity-30 disabled:cursor-not-allowed">
+                      <span className="btn-inner group-hover:bg-transparent">Place a Wager</span>
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
