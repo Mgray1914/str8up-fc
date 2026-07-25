@@ -113,11 +113,20 @@ export default function MatchDetail() {
   const [matchStatus, setMatchStatus] = useState(null);
   const [matchWinner, setMatchWinner] = useState(null);
   const [matchLeague, setMatchLeague] = useState('SOCCER');
+  const [apiMatch, setApiMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchTarget, setMatchTarget] = useState(null);
   const [matching, setMatching] = useState(false);
 
-  const match = FIXTURES.find(f => f.id === id);
+  const fixture = FIXTURES.find(f => f.id === id);
+  const match = fixture || (apiMatch ? {
+    id: apiMatch.matchId,
+    home: apiMatch.homeTeam,
+    away: apiMatch.awayTeam,
+    group: apiMatch.group,
+    round: apiMatch.round,
+    kickoff: apiMatch.kickoffTime,
+  } : null);
 
   useEffect(() => {
     const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
@@ -143,7 +152,7 @@ export default function MatchDetail() {
     if (!id) return;
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).then(data => {
       const m = data.matches?.find(m => m.matchId === id);
-      if (m) { setMatchStatus(m.status); setMatchWinner(m.winner); setMatchLeague(m.league || 'SOCCER'); }
+      if (m) { setMatchStatus(m.status); setMatchWinner(m.winner); setMatchLeague(m.league || 'SOCCER'); setApiMatch(m); }
     }).catch(() => {});
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/match/${id}`)
       .then(r => r.json())
@@ -204,14 +213,15 @@ export default function MatchDetail() {
     setMatching(false);
   };
 
-  if (!match) return <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 text-center">Loading...</div>;
+  if (loading) return <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 text-center">Loading...</div>;
+  if (!match) return <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 text-center">Match not found.</div>;
 
   const kickoff = new Date(match.kickoff);
   const isUpcoming = kickoff > new Date();
 
   return (
     <>
-      <Head><title>{match.home} vs {match.away} - Global Soccer Challenge</title></Head>
+      <Head><title>{match.home} vs {match.away} - {matchLeague === 'NFL' ? 'NFL Preseason Challenge' : 'Global Soccer Challenge'}</title></Head>
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-4">
 
@@ -229,7 +239,7 @@ export default function MatchDetail() {
               </div>
             </div>
             <h1 className="text-center text-xl font-semibold mb-1">{match.home} vs {match.away}</h1>
-            <p className="text-center text-gray-500 text-sm mb-6">Group {match.group} &middot; World Cup 2026</p>
+            <p className="text-center text-gray-500 text-sm mb-6">{matchLeague === 'NFL' ? `${match.round} · NFL Preseason 2026` : `Group ${match.group} · World Cup 2026`}</p>
 
             {matchStatus === 'COMPLETED' ? (
               <div className="text-center mb-6 max-w-md mx-auto">
@@ -260,9 +270,19 @@ export default function MatchDetail() {
                     <p className="text-sm text-gray-400">{formatTime(match.kickoff)}</p>
                   </div>
                   <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
-                    <p className="text-gray-400 text-[11px]">GROUP</p>
-                    <p className="text-[16px]">Group {match.group}</p>
-                    <p className="text-sm text-gray-400">Group Stage</p>
+                    {matchLeague === 'NFL' ? (
+                      <>
+                        <p className="text-gray-400 text-[11px]">ROUND</p>
+                        <p className="text-[16px]">{match.round}</p>
+                        <p className="text-sm text-gray-400">NFL Preseason</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-gray-400 text-[11px]">GROUP</p>
+                        <p className="text-[16px]">Group {match.group}</p>
+                        <p className="text-sm text-gray-400">Group Stage</p>
+                      </>
+                    )}
                   </div>
                 </div>
                 {/* Place a Wager button */}

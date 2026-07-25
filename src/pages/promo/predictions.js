@@ -122,7 +122,7 @@ function MatchCard({ match, prediction, onPredict, matchStatus }) {
       </div>
       <div className="text-center mb-4 cursor-pointer" onClick={() => window.location.href = `/promo/match/${match.id}`}>
         <h2 className="text-[16px] sm:text-[18px] font-semibold leading-tight hover:text-[#1DA1F2] transition">{match.home} vs {match.away}</h2>
-        <p className="text-xs text-gray-500 mt-1">Group {match.group} &middot; {formatDate(match.kickoff)} &middot; {formatTime(match.kickoff)}</p>
+        <p className="text-xs text-gray-500 mt-1">{match.group ? `Group ${match.group}` : match.round} &middot; {formatDate(match.kickoff)} &middot; {formatTime(match.kickoff)}</p>
       </div>
       {prediction ? (
         <div className={`text-center py-3 rounded-[18px] ${prediction.status === 'SETTLED' && prediction.outcome === 'WIN' ? 'border border-yellow-600 bg-[#1a1a0a]' : prediction.status === 'SETTLED' && prediction.outcome === 'LOSS' ? 'border border-red-800 bg-[#1a0a0a]' : 'border border-green-800 bg-[#0a1f0a]'}`}>
@@ -256,6 +256,8 @@ export default function Predictions() {
   const { evmAddress: cdpAddress } = useEvmAddress();
   const [evmAddress, setEvmAddr] = useState(null);
   const router = useRouter();
+  const { promo: promoParam } = router.query;
+  const isNfl = promoParam === 'NFL_2026';
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [predictions, setPredictions] = useState({});
   const [balance, setBalance] = useState(50000);
@@ -264,6 +266,7 @@ export default function Predictions() {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [matchStatuses, setMatchStatuses] = useState({});
+  const [nflMatches, setNflMatches] = useState([]);
 
   useEffect(() => {
     const w = cdpAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
@@ -277,7 +280,7 @@ export default function Predictions() {
     Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r => r.json()).catch(() => null),
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/${wallet}`).then(r => r.json()).catch(() => null),
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).catch(() => null),
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches${isNfl ? '?promo=NFL_2026' : ''}`).then(r => r.json()).catch(() => null),
     ]).then(([bal, preds, matchData]) => {
       if (bal && bal.free !== undefined) setBalance(bal.free);
       if (preds && preds.predictions) {
@@ -294,10 +297,15 @@ if (matchData && matchData.matches) {
         const sMap = {};
         matchData.matches.forEach(m => { sMap[m.matchId] = { status: m.status, winner: m.winner, league: m.league }; });
         setMatchStatuses(sMap);
+        if (isNfl) {
+          setNflMatches(matchData.matches.map(m => ({
+            id: m.matchId, home: m.homeTeam, away: m.awayTeam, group: m.group, round: m.round, kickoff: m.kickoffTime, league: m.league
+          })));
+        }
       }
       setLoading(false);
     });
-  }, [evmAddress]);
+  }, [evmAddress, isNfl]);
   useEffect(() => { if (!user && typeof window !== 'undefined') router.push('/promo'); }, [user]);
 // Poll for status changes (matched/settled)
   useEffect(() => {
@@ -351,7 +359,7 @@ if (matchData && matchData.matches) {
     }
   };
 
-  const groupFixtures = FIXTURES.filter(f => f.group === activeGroup);
+  const groupFixtures = isNfl ? nflMatches : FIXTURES.filter(f => f.group === activeGroup);
   const predCount = Object.keys(predictions).length;
 
   return (
@@ -373,7 +381,7 @@ if (matchData && matchData.matches) {
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-6">
-            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{FIXTURES.length} Group Stage Matches &middot; World Cup 2026</p>
+            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{isNfl ? `${nflMatches.length} NFL Preseason Matches` : `${FIXTURES.length} Group Stage Matches · World Cup 2026`}</p>
             <div className="flex justify-center items-center gap-3 flex-wrap">
               <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
                 <span className="text-gray-400">Balance: </span>
@@ -394,14 +402,16 @@ if (matchData && matchData.matches) {
             </div>
           </div>
 
-          <div className="flex justify-center gap-1.5 sm:gap-2 mb-8 flex-wrap px-2">
-            {GROUPS.map(g => (
-              <button key={g} onClick={() => setActiveGroup(g)}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full text-sm font-bold transition border ${
-                  activeGroup === g ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
-                }`}>{g}</button>
-            ))}
-          </div>
+          {!isNfl && (
+            <div className="flex justify-center gap-1.5 sm:gap-2 mb-8 flex-wrap px-2">
+              {GROUPS.map(g => (
+                <button key={g} onClick={() => setActiveGroup(g)}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full text-sm font-bold transition border ${
+                    activeGroup === g ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
+                  }`}>{g}</button>
+              ))}
+            </div>
+          )}
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 grid-cols-1 gap-4">
               {[...Array(6)].map((_, i) => <MatchCardSkeleton key={i} />)}

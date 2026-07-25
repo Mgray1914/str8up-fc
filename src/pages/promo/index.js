@@ -12,29 +12,6 @@ import {
   useCreateEvmEoaAccount
 } from '@coinbase/cdp-hooks';
 
-function Countdown() {
-  const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
-  useEffect(() => {
-    const target = new Date('2026-06-11T19:00:00Z').getTime();
-    const update = () => {
-      const diff = Math.max(0, target - Date.now());
-      setTime({ d: Math.floor(diff/86400000), h: Math.floor((diff%86400000)/3600000), m: Math.floor((diff%3600000)/60000), s: Math.floor((diff%60000)/1000) });
-    };
-    update();
-    const t = setInterval(update, 1000);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div className="flex justify-center gap-4">
-      {[['d','Days'],['h','Hrs'],['m','Min'],['s','Sec']].map(([k,l]) => (
-        <div key={k} className="text-center">
-          <p className="text-3xl font-bold text-white">{String(time[k]).padStart(2,'0')}</p>
-          <p className="text-gray-500 text-xs">{l}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
 export default function PromoPage() {
   const { signInWithEmail, isPending: sendPending } = useSignInWithEmail();
   const { verifyEmailOTP, isPending: verifyPending } = useVerifyEmailOTP();
@@ -145,16 +122,16 @@ export default function PromoPage() {
   return (
     <>
       <Head>
-        <title>Global Soccer Challenge — Str8Up Gaming</title>
-        <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting World Cup 2026 match outcomes." />
-        <meta property="og:title" content="Global Soccer Challenge — Str8Up Gaming" />
-        <meta property="og:description" content="Free-to-play peer-to-peer prediction contest. $1,400 in prizes. World Cup 2026." />
+        <title>NFL Preseason Challenge — Str8Up Gaming</title>
+        <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting NFL preseason match outcomes." />
+        <meta property="og:title" content="NFL Preseason Challenge — Str8Up Gaming" />
+        <meta property="og:description" content="Free-to-play peer-to-peer prediction contest. $1,400 in prizes. NFL Preseason 2026." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://str8upgaming.com/promo" />
         <meta property="og:image" content="https://str8upgaming.com/og-promo.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Global Soccer Challenge — Str8Up Gaming" />
-        <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. World Cup 2026." />
+        <meta name="twitter:title" content="NFL Preseason Challenge — Str8Up Gaming" />
+        <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. NFL Preseason 2026." />
         <meta name="twitter:image" content="https://str8upgaming.com/og-promo.png" />
       </Head>
 
@@ -162,13 +139,9 @@ export default function PromoPage() {
         <div className="max-w-lg w-full text-center">
 
           <p className="text-sm text-gray-500 uppercase tracking-widest mb-3">Str8Up Gaming Presents</p>
-          <h1 className="text-4xl font-bold mb-2">Global Soccer Challenge</h1>
+          <h1 className="text-4xl font-bold mb-2">NFL Preseason Challenge</h1>
           <p className="text-gray-400 mb-2">Free-to-play peer-to-peer prediction contest</p>
-          <p className="text-green-400 font-semibold mb-8">$1,400 in prizes · World Cup 2026</p>
-        <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-center">
-            <p className="text-gray-400 text-xs uppercase tracking-widest mb-3">First match kicks off in</p>
-            <Countdown />
-          </div>
+          <p className="text-green-400 font-semibold mb-8">$1,400 in prizes · NFL Preseason 2026</p>
 
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>
@@ -265,7 +238,7 @@ export default function PromoPage() {
 
           <div className="mt-12 pt-8 border-t border-gray-800 text-xs text-gray-600 space-y-1">
             <p>WC Credits have no monetary value, are non-transferable, and expire July 15, 2026.</p>
-            <p>Not affiliated with FIFA or any national soccer federation.</p>
+            <p>Not affiliated with the NFL or any NFL team.</p>
             <p>Not related to STR8 tokens or any Str8Up digital asset.</p>
             <a href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</a> · <a href="/promo/amoe" className="text-gray-500 hover:text-white underline">Mail-In Entry (AMOE)</a>
           </div>
