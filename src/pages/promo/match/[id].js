@@ -112,6 +112,7 @@ export default function MatchDetail() {
   const [matchedWagers, setMatchedWagers] = useState([]);
   const [matchStatus, setMatchStatus] = useState(null);
   const [matchWinner, setMatchWinner] = useState(null);
+  const [matchLeague, setMatchLeague] = useState('SOCCER');
   const [loading, setLoading] = useState(true);
   const [matchTarget, setMatchTarget] = useState(null);
   const [matching, setMatching] = useState(false);
@@ -142,7 +143,7 @@ export default function MatchDetail() {
     if (!id) return;
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches`).then(r => r.json()).then(data => {
       const m = data.matches?.find(m => m.matchId === id);
-      if (m) { setMatchStatus(m.status); setMatchWinner(m.winner); }
+      if (m) { setMatchStatus(m.status); setMatchWinner(m.winner); setMatchLeague(m.league || 'SOCCER'); }
     }).catch(() => {});
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/match/${id}`)
       .then(r => r.json())
@@ -241,7 +242,10 @@ export default function MatchDetail() {
               <>
                 {/* Team Selection */}
                 <div className="flex gap-3 mb-6 max-w-md mx-auto">
-                  {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
+                  {(matchLeague === 'NFL'
+                    ? [{v:'home',l:match.home},{v:'away',l:match.away}]
+                    : [{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}]
+                  ).map(o => (
                     <button key={o.v} onClick={() => setPick(o.v)}
                       className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
                         pick === o.v ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-400 hover:border-[#555]'

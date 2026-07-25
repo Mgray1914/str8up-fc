@@ -135,7 +135,7 @@ function MatchCard({ match, prediction, onPredict, matchStatus }) {
           <p className="text-xs text-gray-600">{matchStatus.winner === 'home' ? match.home : matchStatus.winner === 'away' ? match.away : 'Draw'} won</p>
         </div>
       ) : isUpcoming ? (
-        <button onClick={() => onPredict(match)} className="btn-gradient group hover:from-green hover:to-themeblue w-full">
+        <button onClick={() => onPredict({ ...match, league: matchStatus?.league })} className="btn-gradient group hover:from-green hover:to-themeblue w-full">
           <span className="btn-inner group-hover:bg-transparent group-hover:dark:bg-transparent">Make Prediction</span>
         </button>
       ) : (
@@ -184,7 +184,10 @@ function WagerModal({ match, onClose, onSubmit, balance, submitting }) {
             <h3 className="text-center text-xl font-semibold text-white mb-1">Place Prediction</h3>
             <p className="text-center text-gray-500 text-sm mb-5">{match.home} vs {match.away}</p>
             <div className="flex gap-3 mb-5">
-              {[{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}].map(o => (
+              {(match.league === 'NFL'
+                ? [{v:'home',l:match.home},{v:'away',l:match.away}]
+                : [{v:'home',l:match.home},{v:'draw',l:'Draw'},{v:'away',l:match.away}]
+              ).map(o => (
                 <button key={o.v} onClick={() => setPick(o.v)}
                   className={`flex-1 py-3 rounded-[12px] text-sm font-semibold transition border ${
                     pick === o.v ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-400 hover:border-[#555]'
@@ -289,7 +292,7 @@ export default function Predictions() {
       }
 if (matchData && matchData.matches) {
         const sMap = {};
-        matchData.matches.forEach(m => { sMap[m.matchId] = { status: m.status, winner: m.winner }; });
+        matchData.matches.forEach(m => { sMap[m.matchId] = { status: m.status, winner: m.winner, league: m.league }; });
         setMatchStatuses(sMap);
       }
       setLoading(false);
