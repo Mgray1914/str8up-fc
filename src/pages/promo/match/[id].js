@@ -4,14 +4,23 @@ import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
 
 const FLAG_CODES = {"Mexico": "mx", "South Africa": "za", "Korea Republic": "kr", "Czechia": "cz", "Canada": "ca", "Bosnia & Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch", "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct", "USA": "us", "Paraguay": "py", "Australia": "au", "Turkiye": "tr", "Germany": "de", "Curacao": "cw", "Cote d'Ivoire": "ci", "Ecuador": "ec", "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be", "Egypt": "eg", "IR Iran": "ir", "New Zealand": "nz", "Spain": "es", "Cabo Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy", "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no", "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt", "Congo DR": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa"};
-
+const NFL_LOGO_CODES = {"Arizona Cardinals": "ari", "Carolina Panthers": "car", "Kansas City Chiefs": "kc", "Los Angeles Rams": "lar", "Baltimore Ravens": "bal", "Philadelphia Eagles": "phi", "Seattle Seahawks": "sea", "Dallas Cowboys": "dal"};
 const flagUrl = (team) => {
   const code = FLAG_CODES[team];
   if (!code) return null;
   return `https://flagcdn.com/w80/${code}.png`;
 };
-
+const nflLogoUrl = (team) => {
+  const code = NFL_LOGO_CODES[team];
+  if (!code) return null;
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${code}.png`;
+};
 function FlagImg({ team, size = 40 }) {
+  const [nflErrored, setNflErrored] = useState(false);
+  const nflUrl = !nflErrored && nflLogoUrl(team);
+  if (nflUrl) {
+    return <img src={nflUrl} alt={team} width={size} height={size * 0.67} className="rounded-sm object-contain" style={{width: size, height: size * 0.67}} onError={() => setNflErrored(true)} />;
+  }
   const url = flagUrl(team);
   if (!url) return <span className="text-lg font-bold text-gray-500">{team.slice(0,3)}</span>;
   return <img src={url} alt={team} width={size} height={size * 0.67} className="rounded-sm object-cover" style={{width: size, height: size * 0.67}} />;

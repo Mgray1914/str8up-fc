@@ -161,7 +161,7 @@ const Header = () => {
             <Link href="/promo"
              className={`hover:text-white ${router.pathname.startsWith("/promo") ? "text-white" : "text-gray-400"}`}
              >
-              ⚽ Soccer Challenge
+              🏈 NFL Challenge
             </Link>
             <Link href="/#stands" className={`hover:text-white ${router.asPath === "/#stands" ? "text-white" : "text-gray-400"}`}>
               Why STR8UP
