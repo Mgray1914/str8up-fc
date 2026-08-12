@@ -60,7 +60,7 @@ export default function PromoProfile() {
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">Available Balance</p>
                   <p className="text-[#1DA1F2] text-2xl font-bold">{balance.free?.toLocaleString()}</p>
-                  <p className="text-gray-600 text-xs mt-1">WC Credits</p>
+                  <p className="text-gray-600 text-xs mt-1">Promo Credits</p>
                 </div>
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">Locked in Bets</p>

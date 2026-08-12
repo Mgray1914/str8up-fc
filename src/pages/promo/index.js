@@ -146,7 +146,7 @@ export default function PromoPage() {
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Sign up free — get 50,000 WC Credits instantly</li>
+              <li>Sign up free — get 50,000 Promo Credits instantly</li>
               <li>Predict match winners and bet credits against other users</li>
               <li>Top predictors win real prizes at the end of each round</li>
             </ol>
@@ -172,10 +172,10 @@ export default function PromoPage() {
                 <p className="text-xs text-gray-500 mt-1">{user.email}</p>
               </div>
               <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6">
-                <p className="text-sm text-gray-400 mb-2">WC Credits Balance</p>
+                <p className="text-sm text-gray-400 mb-2">Promo Credit Balance</p>
                 <p className="text-5xl font-bold">{registering ? 'Loading...' : (realBalance || 50000).toLocaleString()}</p>
                 <p className="text-xs text-gray-600 mt-2">
-                  No monetary value · Expires July 15, 2026 · Not related to STR8 tokens
+                  No monetary value · Expires September 4, 2026 · Not related to STR8 tokens
                 </p>
               </div>
               <button
@@ -204,7 +204,7 @@ export default function PromoPage() {
                 disabled={sendPending || !email}
                 className="w-full bg-[#1DA1F2] text-white font-semibold py-4 rounded-xl text-lg hover:opacity-90 transition disabled:opacity-50"
               >
-                {sendPending ? 'Sending...' : 'Sign Up Free — Get 50,000 WC Credits'}
+                {sendPending ? 'Sending...' : 'Sign Up Free — Get 50,000 Promo Credits'}
               </button>
               <p className="text-xs text-gray-600">
                 NO PURCHASE NECESSARY · Gas fees sponsored by Str8Up · No crypto wallet required
@@ -237,7 +237,7 @@ export default function PromoPage() {
           )}
 
           <div className="mt-12 pt-8 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-            <p>WC Credits have no monetary value, are non-transferable, and expire July 15, 2026.</p>
+            <p>Promo Credits have no monetary value, are non-transferable, and expire September 4, 2026.</p>
             <p>Not affiliated with the NFL or any NFL team.</p>
             <p>Not related to STR8 tokens or any Str8Up digital asset.</p>
             <a href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</a> · <a href="/promo/amoe" className="text-gray-500 hover:text-white underline">Mail-In Entry (AMOE)</a>

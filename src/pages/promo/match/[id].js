@@ -401,7 +401,7 @@ export default function MatchDetail() {
               <p className="text-white text-lg mb-2">Accept this challenge?</p>
               <div className="bg-[#1C1C1C] rounded-xl p-4 mb-4">
                 <p className="text-gray-400 text-sm">{truncAddr(matchTarget.walletAddress)} bet</p>
-                <p className="text-[#1DA1F2] text-xl font-bold my-1">{matchTarget.stake?.toLocaleString()} WC Credits</p>
+                <p className="text-[#1DA1F2] text-xl font-bold my-1">{matchTarget.stake?.toLocaleString()} Promo Credits</p>
                 <p className="text-gray-400 text-sm">on {matchTarget.pick === 'home' ? match.home : matchTarget.pick === 'away' ? match.away : 'Draw'}</p>
               </div>
               <p className="text-gray-400 text-sm mb-6">You will take the opposing side: <span className="text-white font-semibold">{matchTarget.pick === 'home' ? match.away : matchTarget.pick === 'away' ? match.home : 'Opposite'}</span></p>
@@ -452,7 +452,7 @@ export default function MatchDetail() {
               <div className="text-center py-4">
                 <div className="mb-4"><FlagImg team={pick === 'home' ? match.home : pick === 'away' ? match.away : match.home} size={60} /></div>
                 <p className="text-white text-lg mb-1">Are you sure, you want to</p>
-                <p className="text-white text-lg mb-1">bet <span className="text-[#1DA1F2] font-bold">{stake.toLocaleString()} WC Credits</span></p>
+                <p className="text-white text-lg mb-1">bet <span className="text-[#1DA1F2] font-bold">{stake.toLocaleString()} Promo Credits</span></p>
                 <p className="text-white text-lg mb-6">on <span className="font-bold">{pick === 'home' ? match.home : pick === 'away' ? match.away : 'Draw'}</span>?</p>
                 <div className="flex gap-4">
                   <button onClick={() => setStep('pick')} className="flex-1 py-3 rounded-[12px] border border-[#333] text-gray-400 hover:text-white">No</button>
