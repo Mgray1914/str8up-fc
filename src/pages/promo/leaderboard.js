@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { activePromo } from '../../config/promoMeta';
 
 const truncAddr = (a) => a ? a.slice(0,6) + '...' + a.slice(-4) : '';
 const MEDALS = ['🥇','🥈','🥉'];
@@ -20,13 +21,13 @@ export default function Leaderboard() {
 
   return (
     <>
-      <Head><title>Leaderboard - Global Soccer Challenge 2026</title></Head>
+      <Head><title>{`Leaderboard - ${activePromo.name}`}</title></Head>
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-4">
           <button onClick={() => router.push('/promo/predictions')} className="text-gray-500 hover:text-white mb-6 block text-sm">&larr; Back to Predictions</button>
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Leaderboard</h1>
-            <p className="text-gray-500 text-sm">Top performers in the Global Soccer Challenge</p>
+            <p className="text-gray-500 text-sm">{`Top performers in the ${activePromo.name}`}</p>
           </div>
           {loading ? (
             <div className="space-y-3">

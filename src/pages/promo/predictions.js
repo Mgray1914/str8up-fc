@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
+import { activePromo } from '../../config/promoMeta';
 
 const FLAG_CODES = {"Mexico": "mx", "South Africa": "za", "Korea Republic": "kr", "Czechia": "cz", "Canada": "ca", "Bosnia & Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch", "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct", "USA": "us", "Paraguay": "py", "Australia": "au", "Turkiye": "tr", "Germany": "de", "Curacao": "cw", "Cote d'Ivoire": "ci", "Ecuador": "ec", "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be", "Egypt": "eg", "IR Iran": "ir", "New Zealand": "nz", "Spain": "es", "Cabo Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy", "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no", "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt", "Congo DR": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa"};
 
@@ -378,23 +379,23 @@ if (matchData && matchData.matches) {
   return (
     <>
       <Head>
-  <title>Predictions - Global Soccer Challenge 2026</title>
-  <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting World Cup 2026 match outcomes." />
-  <meta property="og:title" content="Global Soccer Challenge — Str8Up Gaming" />
-  <meta property="og:description" content="Free-to-play peer-to-peer prediction contest. $1,400 in prizes. World Cup 2026." />
+  <title>{isNfl ? `Predictions - ${activePromo.name}` : 'Predictions - Global Soccer Challenge 2026'}</title>
+  <meta name="description" content={isNfl ? activePromo.ogDescription : 'Free-to-play P2P prediction contest. Win prizes predicting World Cup 2026 match outcomes.'} />
+  <meta property="og:title" content={isNfl ? activePromo.title : 'Global Soccer Challenge — Str8Up Gaming'} />
+  <meta property="og:description" content={isNfl ? activePromo.ogDescription : 'Free-to-play peer-to-peer prediction contest. $1,400 in prizes. World Cup 2026.'} />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://str8upgaming.com/promo/predictions" />
-  <meta property="og:image" content="https://str8upgaming.com/og-promo.png" />
+  <meta property="og:image" content={isNfl ? activePromo.ogImage : 'https://str8upgaming.com/og-promo.png'} />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Global Soccer Challenge — Str8Up Gaming" />
-  <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. World Cup 2026." />
-  <meta name="twitter:image" content="https://str8upgaming.com/og-promo.png" />
+  <meta name="twitter:title" content={isNfl ? activePromo.title : 'Global Soccer Challenge — Str8Up Gaming'} />
+  <meta name="twitter:description" content={isNfl ? activePromo.ogDescription : 'Free-to-play P2P prediction contest. $1,400 in prizes. World Cup 2026.'} />
+  <meta name="twitter:image" content={isNfl ? activePromo.ogImage : 'https://str8upgaming.com/og-promo.png'} />
 </Head>
 {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-6">
-            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{isNfl ? `${nflMatches.length} NFL Preseason Matches` : `${FIXTURES.length} Group Stage Matches · World Cup 2026`}</p>
+            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{isNfl ? `${nflMatches.length} ${activePromo.seasonLabel} Matches` : `${FIXTURES.length} Group Stage Matches · World Cup 2026`}</p>
             <div className="flex justify-center items-center gap-3 flex-wrap">
               <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
                 <span className="text-gray-400">Balance: </span>

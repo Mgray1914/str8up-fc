@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { activePromo } from '../../config/promoMeta';
 import {
   useSignInWithEmail,
   useVerifyEmailOTP,
@@ -122,26 +123,26 @@ export default function PromoPage() {
   return (
     <>
       <Head>
-        <title>NFL Preseason Challenge — Str8Up Gaming</title>
-        <meta name="description" content="Free-to-play P2P prediction contest. Win prizes predicting NFL preseason match outcomes." />
-        <meta property="og:title" content="NFL Preseason Challenge — Str8Up Gaming" />
-        <meta property="og:description" content="Free-to-play peer-to-peer prediction contest. $1,400 in prizes. NFL Preseason 2026." />
+        <title>{activePromo.title}</title>
+        <meta name="description" content={activePromo.ogDescription} />
+        <meta property="og:title" content={activePromo.title} />
+        <meta property="og:description" content={activePromo.ogDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://str8upgaming.com/promo" />
-        <meta property="og:image" content="https://str8upgaming.com/og-promo.png" />
+        <meta property="og:image" content={activePromo.ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="NFL Preseason Challenge — Str8Up Gaming" />
-        <meta name="twitter:description" content="Free-to-play P2P prediction contest. $1,400 in prizes. NFL Preseason 2026." />
-        <meta name="twitter:image" content="https://str8upgaming.com/og-promo.png" />
+        <meta name="twitter:title" content={activePromo.title} />
+        <meta name="twitter:description" content={activePromo.ogDescription} />
+        <meta name="twitter:image" content={activePromo.ogImage} />
       </Head>
 
       <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center px-4 pt-28 pb-16">
         <div className="max-w-lg w-full text-center">
 
           <p className="text-sm text-gray-500 uppercase tracking-widest mb-3">Str8Up Gaming Presents</p>
-          <h1 className="text-4xl font-bold mb-2">NFL Preseason Challenge</h1>
+          <h1 className="text-4xl font-bold mb-2">{activePromo.name}</h1>
           <p className="text-gray-400 mb-2">Free-to-play peer-to-peer prediction contest</p>
-          <p className="text-green-400 font-semibold mb-8">$1,400 in prizes · NFL Preseason 2026</p>
+          <p className="text-green-400 font-semibold mb-8">{`$1,400 in prizes · ${activePromo.seasonLabel}`}</p>
 
           <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>

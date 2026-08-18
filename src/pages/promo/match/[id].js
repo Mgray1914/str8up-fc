@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useCurrentUser, useEvmAddress } from '@coinbase/cdp-hooks';
+import { activePromo } from '../../../config/promoMeta';
 
 const FLAG_CODES = {"Mexico": "mx", "South Africa": "za", "Korea Republic": "kr", "Czechia": "cz", "Canada": "ca", "Bosnia & Herzegovina": "ba", "Qatar": "qa", "Switzerland": "ch", "Brazil": "br", "Morocco": "ma", "Haiti": "ht", "Scotland": "gb-sct", "USA": "us", "Paraguay": "py", "Australia": "au", "Turkiye": "tr", "Germany": "de", "Curacao": "cw", "Cote d'Ivoire": "ci", "Ecuador": "ec", "Netherlands": "nl", "Japan": "jp", "Sweden": "se", "Tunisia": "tn", "Belgium": "be", "Egypt": "eg", "IR Iran": "ir", "New Zealand": "nz", "Spain": "es", "Cabo Verde": "cv", "Saudi Arabia": "sa", "Uruguay": "uy", "France": "fr", "Senegal": "sn", "Iraq": "iq", "Norway": "no", "Argentina": "ar", "Algeria": "dz", "Austria": "at", "Jordan": "jo", "Portugal": "pt", "Congo DR": "cd", "Uzbekistan": "uz", "Colombia": "co", "England": "gb-eng", "Croatia": "hr", "Ghana": "gh", "Panama": "pa"};
 const NFL_LOGO_CODES = {"Arizona Cardinals": "ari", "Atlanta Falcons": "atl", "Baltimore Ravens": "bal", "Buffalo Bills": "buf", "Carolina Panthers": "car", "Chicago Bears": "chi", "Cincinnati Bengals": "cin", "Cleveland Browns": "cle", "Dallas Cowboys": "dal", "Denver Broncos": "den", "Detroit Lions": "det", "Green Bay Packers": "gb", "Houston Texans": "hou", "Indianapolis Colts": "ind", "Jacksonville Jaguars": "jax", "Kansas City Chiefs": "kc", "Las Vegas Raiders": "lv", "Los Angeles Chargers": "lac", "Los Angeles Rams": "lar", "Miami Dolphins": "mia", "Minnesota Vikings": "min", "New England Patriots": "ne", "New Orleans Saints": "no", "New York Giants": "nyg", "New York Jets": "nyj", "Philadelphia Eagles": "phi", "Pittsburgh Steelers": "pit", "San Francisco 49ers": "sf", "Seattle Seahawks": "sea", "Tampa Bay Buccaneers": "tb", "Tennessee Titans": "ten", "Washington Commanders": "wsh"};
@@ -121,7 +122,7 @@ export default function MatchDetail() {
   const [matchedWagers, setMatchedWagers] = useState([]);
   const [matchStatus, setMatchStatus] = useState(null);
   const [matchWinner, setMatchWinner] = useState(null);
-  const [matchLeague, setMatchLeague] = useState('SOCCER');
+  const [matchLeague, setMatchLeague] = useState('NFL');
   const [apiMatch, setApiMatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [matchTarget, setMatchTarget] = useState(null);
@@ -230,7 +231,7 @@ export default function MatchDetail() {
 
   return (
     <>
-      <Head><title>{match.home} vs {match.away} - {matchLeague === 'NFL' ? 'NFL Preseason Challenge' : 'Global Soccer Challenge'}</title></Head>
+      <Head><title>{match.home} vs {match.away} - {matchLeague === 'NFL' ? activePromo.name : 'Global Soccer Challenge'}</title></Head>
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-3xl mx-auto px-4">
 
@@ -248,7 +249,7 @@ export default function MatchDetail() {
               </div>
             </div>
             <h1 className="text-center text-xl font-semibold mb-1">{match.home} vs {match.away}</h1>
-            <p className="text-center text-gray-500 text-sm mb-6">{matchLeague === 'NFL' ? `${match.round} · NFL Preseason 2026` : `Group ${match.group} · World Cup 2026`}</p>
+            <p className="text-center text-gray-500 text-sm mb-6">{matchLeague === 'NFL' ? `${match.round} · ${activePromo.seasonLabel}` : `Group ${match.group} · World Cup 2026`}</p>
 
             {matchStatus === 'COMPLETED' ? (
               <div className="text-center mb-6 max-w-md mx-auto">

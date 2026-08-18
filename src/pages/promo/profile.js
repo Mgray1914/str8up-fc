@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { activePromo } from '../../config/promoMeta';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -38,7 +39,7 @@ export default function PromoProfile() {
 
   return (
     <>
-      <Head><title>My Profile - Global Soccer Challenge</title></Head>
+      <Head><title>{`My Profile - ${activePromo.name}`}</title></Head>
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-4xl mx-auto px-4">
 
