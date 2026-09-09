@@ -105,6 +105,13 @@ const FIXTURES = [
 const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short', day:'2-digit', year:'numeric'});
 const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
 const truncAddr = (a) => a ? a.slice(0,6) + '...' + a.slice(-4) : '';
+const formatWeekLabel = (round) => {
+  const wk = /^WK(\d+)$/.exec(round || '');
+  if (wk) return `Week ${wk[1]}`;
+  const pre = /^PRE(\d+)$/.exec(round || '');
+  if (pre) return `Preseason ${pre[1]}`;
+  return round;
+};
 
 export default function MatchDetail() {
   const router = useRouter();
@@ -249,7 +256,7 @@ export default function MatchDetail() {
               </div>
             </div>
             <h1 className="text-center text-xl font-semibold mb-1">{match.home} vs {match.away}</h1>
-            <p className="text-center text-gray-500 text-sm mb-6">{matchLeague === 'NFL' ? `${match.round} · ${activePromo.seasonLabel}` : `Group ${match.group} · World Cup 2026`}</p>
+            <p className="text-center text-gray-500 text-sm mb-6">{matchLeague === 'NFL' ? `${formatWeekLabel(match.round)} · ${activePromo.seasonLabel}` : `Group ${match.group} · World Cup 2026`}</p>
 
             {matchStatus === 'COMPLETED' ? (
               <div className="text-center mb-6 max-w-md mx-auto">
@@ -282,9 +289,9 @@ export default function MatchDetail() {
                   <div className="flex-1 bg-[#1C1C1C] p-3 rounded-md">
                     {matchLeague === 'NFL' ? (
                       <>
-                        <p className="text-gray-400 text-[11px]">ROUND</p>
-                        <p className="text-[16px]">{match.round}</p>
-                        <p className="text-sm text-gray-400">NFL Preseason</p>
+                        <p className="text-gray-400 text-[11px]">WEEK</p>
+                        <p className="text-[16px]">{formatWeekLabel(match.round)}</p>
+                        <p className="text-sm text-gray-400">{activePromo.seasonLabel}</p>
                       </>
                     ) : (
                       <>

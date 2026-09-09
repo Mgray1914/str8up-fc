@@ -7,6 +7,7 @@ const PROMO_META = {
     seasonLabel: 'NFL Preseason 2026',
     ogDescription: 'Free-to-play peer-to-peer prediction contest. NFL Preseason 2026.',
     ogImage: 'https://str8upgaming.com/og-nfl-promo.png',
+    apiPromoParam: 'NFL_2026',
   },
   REGULAR_SEASON: {
     name: 'NFL Regular Season Challenge',
@@ -14,6 +15,7 @@ const PROMO_META = {
     seasonLabel: 'NFL Regular Season 2026',
     ogDescription: 'Free-to-play peer-to-peer prediction contest. NFL Regular Season 2026.',
     ogImage: 'https://str8upgaming.com/og-nfl-promo.png',
+    apiPromoParam: 'NFL_REG_2026',
   },
 };
 

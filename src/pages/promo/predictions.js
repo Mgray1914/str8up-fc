@@ -110,6 +110,15 @@ const GROUPS = ["A","B","C","D","E","F","G","H","I","J","K","L"];
 const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short', day:'2-digit'});
 const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
 
+const weekOrder = (round) => parseInt((round || '').replace(/\D/g, ''), 10) || 0;
+const formatWeekLabel = (round) => {
+  const wk = /^WK(\d+)$/.exec(round || '');
+  if (wk) return `Week ${wk[1]}`;
+  const pre = /^PRE(\d+)$/.exec(round || '');
+  if (pre) return `Preseason ${pre[1]}`;
+  return round;
+};
+
 function Toast({ message, type, onClose }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, []);
   const bg = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-[#1DA1F2]';
@@ -276,6 +285,7 @@ export default function Predictions() {
   const [predictions, setPredictions] = useState({});
   const [balance, setBalance] = useState(50000);
   const [activeGroup, setActiveGroup] = useState('A');
+  const [activeWeek, setActiveWeek] = useState(null);
   const [toast, setToast] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -294,7 +304,7 @@ export default function Predictions() {
     Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`).then(r => r.json()).catch(() => null),
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/predictions/${wallet}`).then(r => r.json()).catch(() => null),
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches${isNfl ? '?promo=NFL_2026' : ''}`).then(r => r.json()).catch(() => null),
+      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/matches${isNfl ? `?promo=${activePromo.apiPromoParam}` : ''}`).then(r => r.json()).catch(() => null),
     ]).then(([bal, preds, matchData]) => {
       if (bal && bal.free !== undefined) setBalance(bal.free);
       if (preds && preds.predictions) {
@@ -321,6 +331,16 @@ if (matchData && matchData.matches) {
     });
   }, [evmAddress, isNfl]);
   useEffect(() => { if (!user && typeof window !== 'undefined') router.push('/promo'); }, [user]);
+
+  const weeks = [...new Set(nflMatches.map(m => m.round).filter(Boolean))].sort((a, b) => weekOrder(a) - weekOrder(b));
+
+  // Default to the current/upcoming week once matches load
+  useEffect(() => {
+    if (!isNfl || activeWeek || weeks.length === 0) return;
+    const now = new Date();
+    const upcoming = weeks.find(w => nflMatches.some(m => m.round === w && new Date(m.kickoff) > now));
+    setActiveWeek(upcoming || weeks[weeks.length - 1]);
+  }, [isNfl, activeWeek, weeks, nflMatches]);
 // Poll for status changes (matched/settled)
   useEffect(() => {
     const wallet = evmAddress;
@@ -373,7 +393,9 @@ if (matchData && matchData.matches) {
     }
   };
 
-  const groupFixtures = isNfl ? nflMatches : FIXTURES.filter(f => f.group === activeGroup);
+  const groupFixtures = isNfl
+    ? nflMatches.filter(m => !activeWeek || m.round === activeWeek)
+    : FIXTURES.filter(f => f.group === activeGroup);
   const predCount = Object.keys(predictions).length;
 
   return (
@@ -395,7 +417,7 @@ if (matchData && matchData.matches) {
       <div className="min-h-screen bg-[#0D0D0D] text-white pt-28 pb-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-6">
-            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{isNfl ? `${nflMatches.length} ${activePromo.seasonLabel} Matches` : `${FIXTURES.length} Group Stage Matches · World Cup 2026`}</p>
+            <p className="text-gray-600 text-xs uppercase tracking-widest mb-1">{isNfl ? `${groupFixtures.length} ${activePromo.seasonLabel} Matches${activeWeek ? ` · ${formatWeekLabel(activeWeek)}` : ''}` : `${FIXTURES.length} Group Stage Matches · World Cup 2026`}</p>
             <div className="flex justify-center items-center gap-3 flex-wrap">
               <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
                 <span className="text-gray-400">Balance: </span>
@@ -423,6 +445,16 @@ if (matchData && matchData.matches) {
                   className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full text-sm font-bold transition border ${
                     activeGroup === g ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
                   }`}>{g}</button>
+              ))}
+            </div>
+          )}
+          {isNfl && weeks.length > 1 && (
+            <div className="flex justify-center gap-1.5 sm:gap-2 mb-8 flex-wrap px-2">
+              {weeks.map(w => (
+                <button key={w} onClick={() => setActiveWeek(w)}
+                  className={`px-3 h-9 sm:h-10 rounded-full text-xs sm:text-sm font-bold transition border whitespace-nowrap ${
+                    activeWeek === w ? 'bg-[#1DA1F2] border-[#1DA1F2] text-white' : 'border-[#333] text-gray-500 hover:border-[#555]'
+                  }`}>{formatWeekLabel(w)}</button>
               ))}
             </div>
           )}
