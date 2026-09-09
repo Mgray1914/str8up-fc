@@ -1,4 +1,4 @@
-export const ACTIVE_PROMO = 'PRESEASON'; // flip to 'REGULAR_SEASON' to switch
+export const ACTIVE_PROMO = 'REGULAR_SEASON'; // flip to 'REGULAR_SEASON' to switch
 
 const PROMO_META = {
   PRESEASON: {
