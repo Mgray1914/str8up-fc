@@ -14,7 +14,7 @@ const PROMO_META = {
     title: 'NFL Regular Season Challenge — Str8Up Gaming',
     seasonLabel: 'NFL Regular Season 2026',
     ogDescription: 'Free-to-play peer-to-peer prediction contest. NFL Regular Season 2026.',
-    ogImage: 'https://str8upgaming.com/og-nfl-promo.png',
+    ogImage: 'https://str8upgaming.com/og-nfl-regular.png',
     apiPromoParam: 'NFL_REG_2026',
   },
 };
