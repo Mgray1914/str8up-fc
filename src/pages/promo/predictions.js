@@ -112,7 +112,7 @@ const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit
 
 const weekOrder = (round) => parseInt((round || '').replace(/\D/g, ''), 10) || 0;
 const formatWeekLabel = (round) => {
-  const wk = /^WK(\d+)$/.exec(round || '');
+  const wk = /^W(\d+)$/.exec(round || '');
   if (wk) return `Week ${wk[1]}`;
   const pre = /^PRE(\d+)$/.exec(round || '');
   if (pre) return `Preseason ${pre[1]}`;

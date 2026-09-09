@@ -106,7 +106,7 @@ const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {month:'short'
 const formatTime = (d) => new Date(d).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
 const truncAddr = (a) => a ? a.slice(0,6) + '...' + a.slice(-4) : '';
 const formatWeekLabel = (round) => {
-  const wk = /^WK(\d+)$/.exec(round || '');
+  const wk = /^W(\d+)$/.exec(round || '');
   if (wk) return `Week ${wk[1]}`;
   const pre = /^PRE(\d+)$/.exec(round || '');
   if (pre) return `Preseason ${pre[1]}`;
