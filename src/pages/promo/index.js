@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { activePromo } from '../../config/promoMeta';
+import { activePromo, siteUrl } from '../../config/promoMeta';
 import {
   useSignInWithEmail,
   useVerifyEmailOTP,
@@ -128,7 +128,7 @@ export default function PromoPage() {
         <meta property="og:title" content={activePromo.title} />
         <meta property="og:description" content={activePromo.ogDescription} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://str8upgaming.com/promo" />
+        <meta property="og:url" content={`${siteUrl}/promo`} />
         <meta property="og:image" content={activePromo.ogImage} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={activePromo.title} />

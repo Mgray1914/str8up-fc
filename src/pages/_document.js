@@ -1,5 +1,5 @@
 import { Html, Head, Main, NextScript } from 'next/document'
-import { activePromo } from '../config/promoMeta'
+import { activePromo, siteUrl } from '../config/promoMeta'
 
 export default function Document() {
   return (
@@ -9,7 +9,7 @@ export default function Document() {
         <meta property="og:description" content={activePromo.ogDescription} />
         <meta property="og:type" content="website" />
         <meta property="og:image" content={activePromo.ogImage} />
-        <meta property="og:url" content="https://str8upgaming.com/promo" />
+        <meta property="og:url" content={`${siteUrl}/promo`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={activePromo.title} />
         <meta name="twitter:description" content={activePromo.ogDescription} />
