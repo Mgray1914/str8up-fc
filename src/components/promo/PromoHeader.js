@@ -7,6 +7,7 @@ const NAV = [
   { href: '/promo/predictions', label: 'Matches' },
   { href: '/promo/leaderboard', label: 'Leaderboard' },
   { href: '/promo/profile', label: 'My Picks' },
+  { href: '/promo/vault', label: 'The Vault' },
 ];
 
 export default function PromoHeader() {

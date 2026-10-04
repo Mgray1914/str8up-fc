@@ -129,7 +129,7 @@ export default function PromoHome() {
             <ol className="list-decimal list-inside space-y-1">
               <li>Sign up free with your email and get Promo Credits</li>
               <li>Pick home, draw or away on Premier League matches and back your pick with credits against other players</li>
-              <li>Every settled matched pick earns a small stock reward in the company of your choice, held by Str8Up on your behalf</li>
+              <li>Matched picks earn a small stock reward in the company of your choice when the match is settled (limits apply), held by Str8Up on your behalf</li>
             </ol>
           </div>
 
