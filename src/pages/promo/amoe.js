@@ -1,53 +1,37 @@
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { activePromo } from '../../config/promoMeta';
+import EligibilityNotice from '../../components/promo/EligibilityNotice';
+
+const PLACEHOLDER = '[PLACEHOLDER — final text from counsel]';
+
+// Alternative Method of Entry. Whether an AMOE is needed for the EPL Challenge, and
+// its terms (method, address, dates, limits), are pending counsel: nothing here is final.
 export default function AMOE() {
-  const router = useRouter();
   return (
     <>
-      <Head><title>Alternative Method of Entry — NFL Regular Season Challenge</title></Head>
-      <div className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center justify-center px-4 py-16">
-        <div className="max-w-lg w-full">
-          <button onClick={() => router.push('/promo')} className="text-xs text-gray-600 hover:text-white mb-4 block">← Back to Challenge</button>
+      <Head><title>{`Alternative Method of Entry - ${activePromo.name}`}</title></Head>
+      <div className="min-h-screen bg-[#0D0D0D] text-white px-4 pt-28 pb-16">
+        <div className="max-w-lg mx-auto">
+          <Link href="/promo" className="text-xs text-gray-600 hover:text-white mb-4 block">&larr; Back to the Challenge</Link>
           <h1 className="text-3xl font-bold mb-2">Alternative Method of Entry</h1>
-          <p className="text-gray-400 mb-6">No purchase or digital account necessary.</p>
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6 mb-6">
-            <p className="text-sm text-gray-300 mb-4">
-              To enter the Str8Up NFL Regular Season Challenge 2026 without creating a digital account,
-              hand-print your name, complete mailing address, email address, date of birth, and
-              the words "Str8Up NFL Regular Season Challenge Entry" on a 3" x 5" card or piece of paper.
-            </p>
-            <p className="text-sm text-gray-300 mb-4">
-              Mail your entry in a hand-addressed #10 envelope with proper postage to:
-            </p>
-            <div className="bg-[#0d0d0d] rounded-lg p-4 border border-gray-800 mb-4">
-              <p className="font-semibold text-white">Str8Up Gaming Holdings, Inc.</p>
-              <p className="text-gray-400 text-sm">NFL Regular Season Challenge 2026 — AMOE</p>
-              <p className="text-gray-400 text-sm">Attn: Promotions Department</p>
-              <p className="text-gray-400 text-sm">4700 NW 183rd St, Miami Gardens, FL 33055</p>
-            </div>
-            <p className="text-sm text-gray-300 mb-4">
-              Each mail-in entry will receive one (1) entry into the Challenge equivalent to the
-              standard 50,000 Promo Credits signup grant. Limit one (1) mail-in entry per person
-              per envelope. Mail-in entries must be postmarked no earlier than September 9, 2026
-              and received by January 10, 2027.
-            </p>
+          <p className="text-gray-400 mb-6">Str8Up {activePromo.name} · {activePromo.seasonLabel}</p>
+
+          <div className="bg-[#2a1f00] border border-yellow-700 rounded-xl p-4 mb-6 text-sm text-yellow-200">
+            DRAFT. The alternative method of entry for this Challenge has not been finalised.
           </div>
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6">
-            <h3 className="font-semibold text-white mb-3">Entry Requirements</h3>
-            <div className="space-y-2 text-sm text-gray-400">
-              <p>• Must be 18 years or older</p>
-              <p>• One entry per person per envelope</p>
-              <p>• Must be hand-written on a 3" x 5" card</p>
-              <p>• Must include: full name, mailing address, email, date of birth</p>
-              <p>• Must include the words: "Str8Up NFL Regular Season Challenge Entry"</p>
-              <p>• Postmarked no earlier than September 9, 2026</p>
-              <p>• Received by January 10, 2027</p>
-              <p>• Syndicates, mechanical reproductions, and mass entries will be disqualified</p>
+          <EligibilityNotice className="mb-6" />
+
+          {['How to enter without an account', 'Where to send your entry', 'What each entry receives', 'Entry dates', 'Entry requirements'].map(title => (
+            <div key={title} className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6 mb-4">
+              <h3 className="font-semibold text-white mb-2">{title}</h3>
+              <p className="text-sm text-yellow-500/80">{PLACEHOLDER}</p>
             </div>
-          </div>
+          ))}
+
           <div className="mt-8 text-center text-xs text-gray-600 space-y-1">
-            <p>This promotion is not affiliated with the National Football League (NFL) or any NFL team.</p>
-            <a href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</a>
+            <p>{activePromo.disclaimer}</p>
+            <Link href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</Link>
           </div>
         </div>
       </div>

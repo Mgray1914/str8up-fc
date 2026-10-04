@@ -38,7 +38,8 @@ const PROMO_META = {
     allowDraw: true,           // three-way market: home / draw / away
     roundStyle: 'MATCHWEEK',   // rounds are MW1..MW38
     disclaimer: 'Not affiliated with, sponsored by, or endorsed by the Premier League or any club.',
-    // [PLACEHOLDER] eligibility copy pending counsel; real geoblocking is enforced server-side.
+    // [PLACEHOLDER] eligibility copy pending counsel. Informational only: nothing here blocks
+    // anyone; any geoblocking has to be added separately (it is not implemented yet).
     eligibilityNotice: '[PLACEHOLDER] The EPL Challenge is not available to residents of the United States. Eligibility requirements are set out in the Official Rules.',
     // [PLACEHOLDER] prize / credit terms pending the Official Rules.
     prizesNote: '[PLACEHOLDER] Prize details will be published in the Official Rules.',

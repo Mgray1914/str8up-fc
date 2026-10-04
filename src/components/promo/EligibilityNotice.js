@@ -1,7 +1,7 @@
 import { activePromo } from '../../config/promoMeta';
 
-// Eligibility notice (copy is a placeholder pending counsel; real geoblocking is
-// enforced server-side).
+// Eligibility notice (copy is a placeholder pending counsel). Informational only:
+// it does not block anyone; geoblocking is not implemented yet.
 export default function EligibilityNotice({ className = '' }) {
   if (!activePromo.eligibilityNotice) return null;
   return (
