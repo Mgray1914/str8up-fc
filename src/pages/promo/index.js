@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { activePromo, siteUrl } from '../../config/promoMeta';
 import {
@@ -9,116 +10,95 @@ import {
   useSignOut,
   useEvmAddress,
   useIsInitialized,
-  useIsSignedIn,
   useCreateEvmEoaAccount
 } from '@coinbase/cdp-hooks';
+import { usePromoSession } from '../../promo/usePromoSession';
+import { getJson } from '../../promo/api';
+import EligibilityNotice from '../../components/promo/EligibilityNotice';
 
-export default function PromoPage() {
+export default function PromoHome() {
   const { signInWithEmail, isPending: sendPending } = useSignInWithEmail();
   const { verifyEmailOTP, isPending: verifyPending } = useVerifyEmailOTP();
   const { currentUser: user } = useCurrentUser();
   const { signOut } = useSignOut();
   const { evmAddress } = useEvmAddress();
-  const isInitialized = useIsInitialized();
-
-  const isSignedIn = useIsSignedIn();
+  const { isInitialized } = useIsInitialized();
+  // Users always get an EOA (wallet sign-in depends on EOAs): never smart accounts.
   const { createEvmEoaAccount } = useCreateEvmEoaAccount();
+  const session = usePromoSession();
+  const { status: sessionStatus, wallet: sessionWallet, authFetch } = session;
+  const router = useRouter();
+
   const [walletCreating, setWalletCreating] = useState(false);
-
-  // Auto-create EVM wallet when user signs in but has no address
-  useEffect(() => {
-    if (user && !evmAddress && !walletCreating) {
-      setWalletCreating(true);
-      console.log('Creating EVM wallet...');
-      createEvmEoaAccount()
-        .then(result => {
-          console.log('EVM wallet created:', result);
-        })
-        .catch(err => {
-          console.error('EVM wallet creation error:', err);
-        })
-        .finally(() => setWalletCreating(false));
-    }
-  }, [user, evmAddress, walletCreating]);
-
-  // Fetch real balance
-  useEffect(() => {
-    const wallet = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-    if (wallet) {
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${wallet}`)
-        .then(r => r.json())
-        .then(data => { if (data.free !== undefined) setRealBalance(data.free); })
-        .catch(() => {});
-    }
-  }, [evmAddress]);
-
-  // Debug CDP state
-  useEffect(() => {
-    if (evmAddress && typeof window !== 'undefined') localStorage.setItem('wc_wallet', evmAddress);
-    const walletForBal = evmAddress || (typeof window !== 'undefined' && localStorage.getItem('wc_wallet'));
-    if (walletForBal && !realBalance) fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${walletForBal}`).then(r=>r.json()).then(d=>{if(d.free!==undefined)setRealBalance(d.free)}).catch(()=>{});
-    console.log('CDP Debug:', { user: !!user, evmAddress, isInitialized, isSignedIn });
-  }, [user, evmAddress, isInitialized, isSignedIn]);
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [flowId, setFlowId] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
-  const [registering, setRegistering] = useState(false);
-  const [registered, setRegistered] = useState(false);
-  const [realBalance, setRealBalance] = useState(null);
+  const [registeredWallet, setRegisteredWallet] = useState(null);
+  const [balance, setBalance] = useState(null);
 
-  // Auto-register with backend when CDP wallet is ready
+  // Create the user's EVM EOA right after email sign-in if they don't have one yet.
   useEffect(() => {
-    if (user && evmAddress && !registered && !registering) {
-      setRegistering(true);
-      fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress: evmAddress, email: user.email || '' })
-      })
-        .then(r => r.json())
-        .then(data => {
-          console.log('Promo registration:', data);
-          setRegistered(true);
-          // Fetch real balance
-          return fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/promo/balance/${evmAddress}`);
-        })
-        .then(r => r.json())
-        .then(bal => {
-          if (bal.total) setRealBalance(bal.total);
-        })
-        .catch(err => console.error('Registration error:', err))
-        .finally(() => setRegistering(false));
+    if (user && !evmAddress && !walletCreating) {
+      setWalletCreating(true);
+      createEvmEoaAccount()
+        .catch(err => console.error('EVM wallet creation error:', err))
+        .finally(() => setWalletCreating(false));
     }
-  }, [user, evmAddress, registered, registering]);
+  }, [user, evmAddress, walletCreating, createEvmEoaAccount]);
+
+  // Once the wallet session is ready (silent signature), register for the promo.
+  // Registration is idempotent server-side; the wallet comes from the session token.
+  useEffect(() => {
+    if (sessionStatus !== 'ready' || !sessionWallet || registeredWallet === sessionWallet) return;
+    let cancelled = false;
+    authFetch('/register', { method: 'POST', body: { email: (user && user.email) || '' } })
+      .then(async (res) => {
+        if (cancelled) return;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setError(data.message || 'Registration failed. Please try again.');
+          return;
+        }
+        setRegisteredWallet(sessionWallet);
+        const bal = await getJson(`/balance/${sessionWallet}`);
+        if (!cancelled && bal && bal.total !== undefined) setBalance(bal.total);
+      })
+      .catch(err => { if (!cancelled) setError(err.message || 'Registration failed. Please try again.'); });
+    return () => { cancelled = true; };
+  }, [sessionStatus, sessionWallet, authFetch, registeredWallet, user]);
 
   const handleSendOtp = async () => {
     try {
       setError('');
       const result = await signInWithEmail({ email });
-      console.log('Full result:', JSON.stringify(result));
-      console.log('flowId received:', result.flowId);
       setFlowId(result.flowId);
       setOtpSent(true);
     } catch (err) {
-      console.error('Send OTP error:', err);
       setError(err.message || 'Failed to send code. Try again.');
     }
   };
 
   const handleVerifyOtp = async () => {
     setError('');
-    console.log('Verifying with flowId:', flowId);
-    console.log('OTP value:', otp);
-    console.log('OTP type:', typeof otp);
     verifyEmailOTP({ flowId, otp }).catch(err => {
-      console.error('Verify OTP error:', err);
-      console.error('Error details:', JSON.stringify(err));
       setError(err.message || 'Invalid code. Try again.');
     });
   };
+
+  const handleSignOut = async () => {
+    session.clear();
+    setRegisteredWallet(null);
+    setBalance(null);
+    await signOut();
+  };
+
+  const ready = session.status === 'ready' && registeredWallet === session.wallet;
+  const statusLine = !evmAddress ? 'Creating your wallet...'
+    : session.status === 'signing' ? 'Securing your session...'
+    : session.status === 'error' ? null
+    : !ready ? 'Setting up your account...' : null;
 
   return (
     <>
@@ -141,51 +121,59 @@ export default function PromoPage() {
 
           <p className="text-sm text-gray-500 uppercase tracking-widest mb-3">Str8Up Gaming Presents</p>
           <h1 className="text-4xl font-bold mb-2">{activePromo.name}</h1>
-          <p className="text-gray-400 mb-2">Free-to-play peer-to-peer prediction contest</p>
-          <p className="text-green-400 font-semibold mb-8">{`$1,400 in prizes · ${activePromo.seasonLabel}`}</p>
+          <p className="text-gray-400 mb-2">Free-to-play prediction challenge · {activePromo.seasonLabel}</p>
+          <p className="text-green-400 font-semibold mb-8">Pick home, draw or away — earn stock rewards</p>
 
-          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-gray-400 text-left">
+          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-6 text-sm text-gray-400 text-left">
             <p className="font-semibold text-white mb-2">How it works</p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Sign up free — get 50,000 Promo Credits instantly</li>
-              <li>Predict match winners and bet credits against other users</li>
-              <li>Top predictors win real prizes at the end of each round</li>
+              <li>Sign up free with your email and get Promo Credits</li>
+              <li>Pick home, draw or away on Premier League matches and back your pick with credits against other players</li>
+              <li>Every settled matched pick earns a small stock reward in the company of your choice, held by Str8Up on your behalf</li>
             </ol>
           </div>
-<div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-8 text-sm text-left">
-            <p className="font-semibold text-white mb-3">Prize Breakdown</p>
-            <div className="space-y-2 text-gray-400">
-              <div className="flex justify-between"><span>Grand Prize</span><span className="text-green-400 font-semibold">$500</span></div>
-              <div className="flex justify-between"><span>Second Place</span><span className="text-green-400 font-semibold">$300</span></div>
-              <div className="flex justify-between"><span>Third Place</span><span className="text-green-400 font-semibold">$100</span></div>
-              <div className="flex justify-between"><span>Round Winners (5)</span><span className="text-green-400 font-semibold">$100 each</span></div>
-              <div className="flex justify-between border-t border-gray-700 pt-2 mt-2"><span className="text-white font-semibold">Total</span><span className="text-green-400 font-bold">$1,400</span></div>
-            </div>
-            <p className="text-xs text-gray-600 mt-3">Prizes fulfilled via digital Visa Gift Card. No crypto payments.</p>
+
+          <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-4 mb-6 text-sm text-left">
+            <p className="font-semibold text-white mb-2">Prizes</p>
+            <p className="text-gray-400">{activePromo.prizesNote}</p>
           </div>
+
+          <EligibilityNotice className="mb-8" />
+
           {!isInitialized ? (
             <div className="text-gray-500 text-sm py-8">Loading...</div>
           ) : user ? (
             <div className="space-y-4">
               <div className="bg-[#1a1a1a] border border-green-500 rounded-xl p-6">
-                <p className="text-sm text-gray-400 mb-1">Connected Wallet</p>
-                <p className="text-green-400 font-mono text-sm">{evmAddress ? evmAddress.slice(0,6) + "..." + evmAddress.slice(-4) : "Loading..."}</p>
+                <p className="text-sm text-gray-400 mb-1">Your account</p>
+                <p className="text-green-400 font-mono text-sm">{evmAddress ? `${evmAddress.slice(0, 6)}...${evmAddress.slice(-4)}` : 'Creating wallet...'}</p>
                 <p className="text-xs text-gray-500 mt-1">{user.email}</p>
               </div>
+              {statusLine && <p className="text-sm text-gray-500">{statusLine}</p>}
+              {session.status === 'error' && (
+                <div className="text-sm text-red-400">
+                  <p>{session.error || 'Could not secure your session.'}</p>
+                  <button onClick={session.retry} className="underline mt-1">Try again</button>
+                </div>
+              )}
+              {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6">
                 <p className="text-sm text-gray-400 mb-2">Promo Credit Balance</p>
-                <p className="text-5xl font-bold">{registering ? 'Loading...' : (realBalance || 50000).toLocaleString()}</p>
-                <p className="text-xs text-gray-600 mt-2">
-                  No monetary value · Expires September 4, 2026 · Not related to STR8 tokens
-                </p>
+                <p className="text-5xl font-bold">{balance == null ? '—' : balance.toLocaleString()}</p>
+                <p className="text-xs text-gray-600 mt-2">{activePromo.creditsNote}</p>
               </div>
               <button
                 onClick={() => router.push('/promo/predictions')}
-                className="w-full bg-green-600 text-white font-semibold py-4 rounded-xl text-lg hover:opacity-90 transition"
+                disabled={!ready}
+                className="w-full bg-green-600 text-white font-semibold py-4 rounded-xl text-lg hover:opacity-90 transition disabled:opacity-50"
               >
                 Start Predicting →
               </button>
-              <button onClick={signOut} className="text-sm text-gray-500 hover:text-white transition">
+              <button onClick={() => router.push('/promo/vault')} disabled={!ready}
+                className="w-full border border-gray-600 text-white font-semibold py-3 rounded-xl hover:border-gray-400 transition disabled:opacity-50">
+                Open The Vault
+              </button>
+              <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-white transition">
                 Sign Out
               </button>
             </div>
@@ -205,10 +193,10 @@ export default function PromoPage() {
                 disabled={sendPending || !email}
                 className="w-full bg-[#1DA1F2] text-white font-semibold py-4 rounded-xl text-lg hover:opacity-90 transition disabled:opacity-50"
               >
-                {sendPending ? 'Sending...' : 'Sign Up Free — Get 50,000 Promo Credits'}
+                {sendPending ? 'Sending...' : 'Sign Up Free'}
               </button>
               <p className="text-xs text-gray-600">
-                NO PURCHASE NECESSARY · Gas fees sponsored by Str8Up · No crypto wallet required
+                NO PURCHASE NECESSARY · No crypto wallet required · Not available to US residents
               </p>
             </div>
           ) : (
@@ -229,7 +217,7 @@ export default function PromoPage() {
                 disabled={verifyPending || otp.length < 6}
                 className="w-full bg-[#1DA1F2] text-white font-semibold py-4 rounded-xl text-lg hover:opacity-90 transition disabled:opacity-50"
               >
-                {verifyPending ? 'Verifying...' : 'Verify & Create Wallet'}
+                {verifyPending ? 'Verifying...' : 'Verify & Create Account'}
               </button>
               <button onClick={() => { setOtpSent(false); setError(''); }} className="text-sm text-gray-500 hover:text-white transition">
                 Use a different email
@@ -238,10 +226,10 @@ export default function PromoPage() {
           )}
 
           <div className="mt-12 pt-8 border-t border-gray-800 text-xs text-gray-600 space-y-1">
-            <p>Promo Credits have no monetary value, are non-transferable, and expire September 4, 2026.</p>
-            <p>Not affiliated with the NFL or any NFL team.</p>
+            <p>{activePromo.creditsNote}</p>
+            <p>{activePromo.disclaimer}</p>
             <p>Not related to STR8 tokens or any Str8Up digital asset.</p>
-            <a href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</a> · <a href="/promo/amoe" className="text-gray-500 hover:text-white underline">Mail-In Entry (AMOE)</a>
+            <Link href="/promo/rules" className="text-gray-500 hover:text-white underline">Official Rules</Link> · <Link href="/promo/amoe" className="text-gray-500 hover:text-white underline">Mail-In Entry (AMOE)</Link>
           </div>
 
         </div>
