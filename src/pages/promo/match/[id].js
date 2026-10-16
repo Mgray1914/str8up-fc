@@ -10,7 +10,8 @@ import { usePromoSession } from '../../../promo/usePromoSession';
 import { useRequireSignIn } from '../../../promo/useRequireSignIn';
 import { formatKickoff, outcomeLabel, pickOptions, roundLabel, truncAddr } from '../../../promo/format';
 
-const OTHER_SIDE_NOTE = 'Pick a different outcome — you’ll be matched with an open pick or the house.';
+// Taking an open pick: equal-stake matching, so the stake is that pick's amount.
+const takeNote = (w, match) => `You're taking ${outcomeLabel(w.pick, match)} ${w.stake.toLocaleString()} from ${truncAddr(w.walletAddress)}. Picks only match at the same amount.`;
 
 function WagerRow({ w, match, right }) {
   return (
@@ -52,7 +53,7 @@ export default function MatchDetail() {
   const [openWagers, setOpenWagers] = useState([]);
   const [matchedWagers, setMatchedWagers] = useState([]);
   const [pick, setPick] = useState(null);
-  // Prediction modal: { initialPick, options?, title?, note? } or null
+  // Prediction modal: { initialPick, options?, title?, note?, take? } or null; take = the open pick being taken
   const [modal, setModal] = useState(null);
 
   const loadWagers = useCallback(async () => {
@@ -84,9 +85,14 @@ export default function MatchDetail() {
 
   const submit = async ({ matchId, pick: p, stake }) => {
     try {
-      const res = await authFetch('/predictions', { method: 'POST', body: { matchId, pick: p, stake } });
+      const take = modal && modal.take;
+      const body = take ? { matchId, pick: p, stake: take.stake, takePredictionId: take._id } : { matchId, pick: p, stake };
+      const res = await authFetch('/predictions', { method: 'POST', body });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) return { ok: false, message: data.message || 'Could not place your prediction.' };
+      if (!res.ok) {
+        if (res.status === 409) loadWagers(); // someone else took it first: refresh the list
+        return { ok: false, message: data.message || 'Could not place your prediction.' };
+      }
       loadWagers();
       loadBalance();
       return { ok: true };
@@ -192,15 +198,18 @@ export default function MatchDetail() {
                     {openWagers.map((w, i) => (
                       <WagerRow key={w._id || i} w={w} match={match} right={
                         isOpen && !mine(w) ? (
-                          // Three outcomes: a different pick is not promised to be matched against
-                          // this particular pick (the backend matches the oldest opposing pick).
-                          <button onClick={() => {
-                              loadBalance();
-                              setModal({ initialPick: null, options: options.filter(o => o.v !== w.pick), title: 'Pick a different outcome', note: OTHER_SIDE_NOTE });
-                            }}
-                            className="shrink-0 px-3 py-1.5 rounded-lg bg-[#1DA1F2] text-white text-xs font-semibold hover:opacity-90 transition">
-                            Pick differently
-                          </button>
+                          // Three outcomes: either different outcome can take this pick, at its exact stake.
+                          <div className="flex flex-col gap-1 shrink-0">
+                            {options.filter(o => o.v !== w.pick).map(o => (
+                              <button key={o.v} onClick={() => {
+                                  loadBalance();
+                                  setModal({ initialPick: o.v, options: options.filter(x => x.v !== w.pick), title: 'Take this pick', note: takeNote(w, match), take: w });
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-[#1DA1F2] text-white text-xs font-semibold hover:opacity-90 transition whitespace-nowrap">
+                                Take {w.stake?.toLocaleString()} on {o.l}
+                              </button>
+                            ))}
+                          </div>
                         ) : (
                           <span className="unmatched text-xs shrink-0">{mine(w) ? 'Yours' : 'Open'}</span>
                         )
@@ -236,13 +245,14 @@ export default function MatchDetail() {
 
       {modal && (
         <PickModal
-          key={modal.title || 'pick'}
+          key={modal.take ? `take-${modal.take._id}` : 'pick'}
           match={match}
           balance={balance || 0}
           initialPick={modal.initialPick}
           options={modal.options}
           title={modal.title}
           note={modal.note}
+          lockedStake={modal.take ? modal.take.stake : null}
           onClose={() => setModal(null)}
           onSubmit={submit}
         />

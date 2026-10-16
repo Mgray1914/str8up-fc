@@ -7,9 +7,11 @@ const MIN_STAKE = 100;
 
 // Place a prediction: pick (home / draw / away), stake, confirm. onSubmit resolves
 // to { ok, message }; success is shown only when the backend accepted the pick.
-export default function PickModal({ match, balance, onClose, onSubmit, initialPick = null, options, title = 'Place Prediction', note }) {
+// lockedStake: taking an existing open pick - matches are equal-stake only, so the
+// stake is fixed to that pick's amount (shown, not editable).
+export default function PickModal({ match, balance, onClose, onSubmit, initialPick = null, options, title = 'Place Prediction', note, lockedStake = null }) {
   const [pick, setPick] = useState(initialPick);
-  const [stake, setStake] = useState(Math.min(1000, Math.max(MIN_STAKE, balance || MIN_STAKE)));
+  const [stake, setStake] = useState(lockedStake ?? Math.min(1000, Math.max(MIN_STAKE, balance || MIN_STAKE)));
   const [step, setStep] = useState('pick');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -51,6 +53,16 @@ export default function PickModal({ match, balance, onClose, onSubmit, initialPi
                 <span className="text-gray-400">Stake</span>
                 <span className="text-gray-600">Balance: {(balance || 0).toLocaleString()}</span>
               </div>
+              {lockedStake != null ? (
+                <>
+                  <div aria-readonly="true" className="w-full bg-[#1C1C1C] border border-[#333] text-white px-4 py-3 rounded-[12px] text-center text-xl font-bold">
+                    {lockedStake.toLocaleString()} <span className="text-sm font-normal text-gray-400">credits 🔒</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Set to match this open pick. Picks only match at the same amount.</p>
+                  {lockedStake > (balance || 0) && <p className="text-xs text-red-400 mt-1 text-center">Your balance is too low to take this pick.</p>}
+                </>
+              ) : (
+              <>
               <input type="number" value={stake} min={MIN_STAKE} max={balance} step={100}
                 onChange={e => setStake(Math.min(Math.max(MIN_STAKE, Number(e.target.value) || MIN_STAKE), balance || MIN_STAKE))}
                 className="w-full bg-[#1C1C1C] border border-[#333] text-white px-4 py-3 rounded-[12px] text-center text-xl font-bold focus:outline-none focus:border-[#1DA1F2]" />
@@ -62,6 +74,8 @@ export default function PickModal({ match, balance, onClose, onSubmit, initialPi
                   </button>
                 ))}
               </div>
+              </>
+              )}
             </div>
             <button onClick={() => setStep('confirm')} disabled={!pick || stake < MIN_STAKE || stake > (balance || 0)}
               className="w-full py-3 rounded-[12px] bg-[#1DA1F2] text-white font-bold text-lg disabled:opacity-30 hover:opacity-90 transition">
