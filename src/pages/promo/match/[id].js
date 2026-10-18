@@ -8,6 +8,7 @@ import PickModal from '../../../components/promo/PickModal';
 import { getJson } from '../../../promo/api';
 import { usePromoSession } from '../../../promo/usePromoSession';
 import { useRequireSignIn } from '../../../promo/useRequireSignIn';
+import { usePromoBalance } from '../../../promo/usePromoBalance';
 import { formatKickoff, outcomeLabel, pickOptions, roundLabel, truncAddr } from '../../../promo/format';
 
 // Taking an open pick: equal-stake matching, so the stake is that pick's amount.
@@ -49,7 +50,8 @@ export default function MatchDetail() {
 
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [balance, setBalance] = useState(null);
+  const { balance: bal, refresh: loadBalance } = usePromoBalance(wallet);
+  const balance = bal ? bal.free : null;
   const [openWagers, setOpenWagers] = useState([]);
   const [matchedWagers, setMatchedWagers] = useState([]);
   const [pick, setPick] = useState(null);
@@ -63,12 +65,6 @@ export default function MatchDetail() {
     setMatchedWagers((data && data.matched) || []);
   }, [id]);
 
-  const loadBalance = useCallback(async () => {
-    if (!wallet) return;
-    const bal = await getJson(`/balance/${wallet}`);
-    if (bal && bal.free !== undefined) setBalance(bal.free);
-  }, [wallet]);
-
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
@@ -80,8 +76,6 @@ export default function MatchDetail() {
     });
     return () => { cancelled = true; };
   }, [id, loadWagers]);
-
-  useEffect(() => { loadBalance(); }, [loadBalance]);
 
   const submit = async ({ matchId, pick: p, stake }) => {
     try {

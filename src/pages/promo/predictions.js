@@ -7,6 +7,7 @@ import PickModal from '../../components/promo/PickModal';
 import { getJson } from '../../promo/api';
 import { usePromoSession } from '../../promo/usePromoSession';
 import { useRequireSignIn } from '../../promo/useRequireSignIn';
+import { usePromoBalance } from '../../promo/usePromoBalance';
 import { formatKickoff, outcomeLabel, roundLabel, roundOrder } from '../../promo/format';
 
 const REFRESH_MS = 30 * 1000;
@@ -85,7 +86,8 @@ export default function Predictions() {
   const { wallet, authFetch } = usePromoSession();
   const [matches, setMatches] = useState([]);
   const [predictions, setPredictions] = useState({});
-  const [balance, setBalance] = useState(null);
+  const { balance: bal, status: balanceStatus, refresh: refreshBalance } = usePromoBalance(wallet);
+  const balance = bal ? bal.free : null;
   const [loading, setLoading] = useState(true);
   const [activeRound, setActiveRound] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -106,15 +108,14 @@ export default function Predictions() {
   // The user's predictions and balance; refreshed periodically for match/settle updates.
   const loadMine = useCallback(async () => {
     if (!wallet) return;
-    const [bal, mine] = await Promise.all([getJson(`/balance/${wallet}`), getJson(`/predictions/${wallet}`)]);
-    if (bal && bal.free !== undefined) setBalance(bal.free);
+    const [, mine] = await Promise.all([refreshBalance(), getJson(`/predictions/${wallet}`)]);
     if (mine && mine.predictions) {
       const byMatch = {};
       // newest first from the API: keep the latest pick per match
       for (const p of mine.predictions) if (!byMatch[p.matchId]) byMatch[p.matchId] = p;
       setPredictions(byMatch);
     }
-  }, [wallet]);
+  }, [wallet, refreshBalance]);
   useEffect(() => {
     loadMine();
     const t = setInterval(loadMine, REFRESH_MS);
@@ -172,7 +173,13 @@ export default function Predictions() {
             <div className="flex justify-center items-center gap-3 flex-wrap">
               <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
                 <span className="text-gray-400">Balance: </span>
-                <span className="text-[#1DA1F2] font-bold">{balance == null ? '—' : balance.toLocaleString()}</span>
+                {balance != null ? (
+                  <span className="text-[#1DA1F2] font-bold">{balance.toLocaleString()}</span>
+                ) : balanceStatus === 'error' ? (
+                  <><span className="text-gray-500 font-bold">—</span> <button onClick={refreshBalance} className="text-xs underline text-gray-400 hover:text-white">retry</button></>
+                ) : (
+                  <span className="inline-block h-3 w-14 rounded bg-[#2a2a2a] animate-pulse align-middle" aria-label="Loading balance" />
+                )}
               </span>
               <span className="bg-[#1C1C1C] rounded-xl px-4 py-2 text-sm">
                 <span className="text-gray-400">Picks: </span>

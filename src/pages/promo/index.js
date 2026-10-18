@@ -13,7 +13,7 @@ import {
   useCreateEvmEoaAccount
 } from '@coinbase/cdp-hooks';
 import { usePromoSession } from '../../promo/usePromoSession';
-import { getJson } from '../../promo/api';
+import { usePromoBalance } from '../../promo/usePromoBalance';
 import EligibilityNotice from '../../components/promo/EligibilityNotice';
 
 export default function PromoHome() {
@@ -36,7 +36,9 @@ export default function PromoHome() {
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [registeredWallet, setRegisteredWallet] = useState(null);
-  const [balance, setBalance] = useState(null);
+  // Same balance source as the match board (GET /balance/:wallet, free credits).
+  const { balance, status: balanceStatus, refresh: refreshBalance } = usePromoBalance(sessionWallet);
+  const userEmail = (user && user.email) || '';
 
   // Create the user's EVM EOA right after email sign-in if they don't have one yet.
   useEffect(() => {
@@ -50,10 +52,12 @@ export default function PromoHome() {
 
   // Once the wallet session is ready (silent signature), register for the promo.
   // Registration is idempotent server-side; the wallet comes from the session token.
+  // The balance is NOT fetched in here: setRegisteredWallet re-runs this effect, whose
+  // cleanup used to cancel the balance update - the landing page then showed "—" forever.
   useEffect(() => {
     if (sessionStatus !== 'ready' || !sessionWallet || registeredWallet === sessionWallet) return;
     let cancelled = false;
-    authFetch('/register', { method: 'POST', body: { email: (user && user.email) || '' } })
+    authFetch('/register', { method: 'POST', body: { email: userEmail } })
       .then(async (res) => {
         if (cancelled) return;
         if (!res.ok) {
@@ -62,12 +66,11 @@ export default function PromoHome() {
           return;
         }
         setRegisteredWallet(sessionWallet);
-        const bal = await getJson(`/balance/${sessionWallet}`);
-        if (!cancelled && bal && bal.total !== undefined) setBalance(bal.total);
+        refreshBalance(); // a first registration has just granted the credits
       })
       .catch(err => { if (!cancelled) setError(err.message || 'Registration failed. Please try again.'); });
     return () => { cancelled = true; };
-  }, [sessionStatus, sessionWallet, authFetch, registeredWallet, user]);
+  }, [sessionStatus, sessionWallet, authFetch, registeredWallet, userEmail, refreshBalance]);
 
   const handleSendOtp = async () => {
     try {
@@ -90,7 +93,6 @@ export default function PromoHome() {
   const handleSignOut = async () => {
     session.clear();
     setRegisteredWallet(null);
-    setBalance(null);
     await signOut();
   };
 
@@ -159,7 +161,21 @@ export default function PromoHome() {
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <div className="bg-[#1a1a1a] border border-gray-700 rounded-xl p-6">
                 <p className="text-sm text-gray-400 mb-2">Promo Credit Balance</p>
-                <p className="text-5xl font-bold">{balance == null ? '—' : balance.toLocaleString()}</p>
+                {balance ? (
+                  <>
+                    <p className="text-5xl font-bold">{balance.free.toLocaleString()}</p>
+                    {balance.locked > 0 && <p className="text-xs text-gray-500 mt-1">+ {balance.locked.toLocaleString()} in open picks</p>}
+                  </>
+                ) : balanceStatus === 'error' ? (
+                  <div>
+                    <p className="text-5xl font-bold text-gray-500">—</p>
+                    <p className="text-xs text-gray-500 mt-2">Couldn&apos;t load your balance. <button onClick={refreshBalance} className="underline text-gray-300 hover:text-white">Retry</button></p>
+                  </div>
+                ) : !sessionWallet ? (
+                  <p className="text-sm text-gray-500 py-3">Available once your account is set up.</p>
+                ) : (
+                  <div className="h-12 w-40 mx-auto rounded-lg bg-[#2a2a2a] animate-pulse" aria-label="Loading balance" />
+                )}
                 <p className="text-xs text-gray-600 mt-2">{activePromo.creditsNote}</p>
               </div>
               <button

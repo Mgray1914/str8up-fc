@@ -10,6 +10,14 @@ import StockPicker from '../../components/promo/StockPicker';
 
 const money = (n) => (n == null ? '—' : n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 const shareFmt = (n) => (n == null ? '—' : n.toLocaleString(undefined, { maximumFractionDigits: 6 }));
+// "Fri Oct 16, 4:00 PM ET" - always US Eastern, whatever the viewer's time zone.
+function etStamp(when) {
+  const d = new Date(when);
+  if (Number.isNaN(d.getTime())) return null;
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }).formatToParts(d).map(x => [x.type, x.value]));
+  return `${p.weekday} ${p.month} ${p.day}, ${p.hour}:${p.minute} ${p.dayPeriod} ET`;
+}
+const REWARD_LIST_LIMIT = 200;
 const dateFmt = (d) => (d ? new Date(d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '');
 
 // Friendly copy for each reward state. FAILED is still awarded: an admin retries
@@ -66,7 +74,7 @@ export default function Vault() {
 
   const load = useCallback(async () => {
     if (!wallet) return;
-    const [v, ms] = await Promise.all([getJson(`/rewards/vault/${wallet}`), getJson(`/matches?promo=${activePromo.apiPromoParam}`)]);
+    const [v, ms] = await Promise.all([getJson(`/rewards/vault/${wallet}?limit=${REWARD_LIST_LIMIT}`), getJson(`/matches?promo=${activePromo.apiPromoParam}`)]);
     setFailed(!v);
     if (v) setVault(v);
     const byId = {};
@@ -79,6 +87,11 @@ export default function Vault() {
   const holdings = (vault && vault.holdings) || [];
   const rewards = (vault && vault.rewards) || [];
   const awaitingPrice = holdings.reduce((s, h) => s + (h.usdAwaitingPriceLock || 0), 0);
+  // The quote timestamp the values are based on (Dinari's latest price, not when we fetched it).
+  const priceTimes = holdings.map(h => h.priceAsOf && new Date(h.priceAsOf).getTime()).filter(t => t > 0);
+  const priceStamp = priceTimes.length ? etStamp(Math.max(...priceTimes)) : null;
+  const rewardCount = rewards.filter(r => r.status !== 'SKIPPED').length;
+  const rewardCountLabel = `${rewardCount}${rewards.length >= REWARD_LIST_LIMIT ? '+' : ''} reward${rewardCount === 1 ? '' : 's'}`;
 
   return (
     <>
@@ -110,13 +123,11 @@ export default function Vault() {
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">Current value</p>
                   <p className="text-[#1DA1F2] text-3xl font-bold">{money(vault.totals && vault.totals.currentValueUsd)}</p>
-                  <p className="text-gray-600 text-xs mt-1">
-                    of shares with a locked amount{vault.pricesCachedAt ? ` · prices as of ${new Date(vault.pricesCachedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}` : ''}
-                  </p>
+                  {priceStamp && <p className="text-gray-600 text-xs mt-1">Based on latest price · {priceStamp}</p>}
                 </div>
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">Total rewards earned</p>
-                  <p className="text-white text-3xl font-bold">{money(vault.totals && vault.totals.usdAwarded)}</p>
+                  <p className="text-white text-3xl font-bold">{money(vault.totals && vault.totals.usdAwarded)}<span className="text-gray-400 text-base font-normal"> · {rewardCountLabel}</span></p>
                   {awaitingPrice > 0 && <p className="text-yellow-500 text-xs mt-1">{money(awaitingPrice)} awaiting a share price</p>}
                 </div>
               </div>
@@ -144,12 +155,13 @@ export default function Vault() {
                           <p className="text-green-400 font-semibold">{shareFmt(h.sharesPurchased)}</p>
                           <p className="text-gray-500 text-[11px]">Purchased</p>
                         </div>
-                        <div className="bg-[#1C1C1C] rounded-lg p-2">
-                          <p className="text-cyan-300 font-semibold">{shareFmt(h.sharesPending)}</p>
+                        {/* Zero tiles are greyed out, never in a warning colour. */}
+                        <div className={`bg-[#1C1C1C] rounded-lg p-2 ${h.sharesPending ? '' : 'opacity-50'}`}>
+                          <p className={`font-semibold ${h.sharesPending ? 'text-cyan-300' : 'text-gray-500'}`}>{shareFmt(h.sharesPending)}</p>
                           <p className="text-gray-500 text-[11px]">Pending purchase</p>
                         </div>
-                        <div className="bg-[#1C1C1C] rounded-lg p-2">
-                          <p className="text-yellow-400 font-semibold">{money(h.usdAwaitingPriceLock)}</p>
+                        <div className={`bg-[#1C1C1C] rounded-lg p-2 ${h.usdAwaitingPriceLock ? '' : 'opacity-50'}`}>
+                          <p className={`font-semibold ${h.usdAwaitingPriceLock ? 'text-yellow-400' : 'text-gray-500'}`}>{money(h.usdAwaitingPriceLock)}</p>
                           <p className="text-gray-500 text-[11px]">Awaiting price</p>
                         </div>
                       </div>

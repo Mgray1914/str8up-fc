@@ -6,6 +6,7 @@ import { activePromo } from '../../config/promoMeta';
 import { getJson } from '../../promo/api';
 import { usePromoSession } from '../../promo/usePromoSession';
 import { useRequireSignIn } from '../../promo/useRequireSignIn';
+import { usePromoBalance } from '../../promo/usePromoBalance';
 import { formatKickoff, outcomeLabel, roundLabel, truncAddr } from '../../promo/format';
 
 const statusChip = (p) => {
@@ -20,7 +21,8 @@ export default function PromoProfile() {
   const router = useRouter();
   const signedIn = useRequireSignIn();
   const { wallet } = usePromoSession();
-  const [balance, setBalance] = useState({ free: 0, locked: 0, total: 0 });
+  const { balance: bal, status: balanceStatus, refresh: refreshBalance } = usePromoBalance(wallet);
+  const balance = bal || { free: null, locked: null };
   const [predictions, setPredictions] = useState([]);
   const [matches, setMatches] = useState({});
   const [userInfo, setUserInfo] = useState(null);
@@ -30,13 +32,11 @@ export default function PromoProfile() {
     if (!wallet) return;
     let cancelled = false;
     Promise.all([
-      getJson(`/balance/${wallet}`),
       getJson(`/predictions/${wallet}`),
       getJson(`/user/${wallet}`),
       getJson(`/matches?promo=${activePromo.apiPromoParam}`),
-    ]).then(([bal, preds, user, ms]) => {
+    ]).then(([preds, user, ms]) => {
       if (cancelled) return;
-      if (bal) setBalance(bal);
       setPredictions((preds && preds.predictions) || []);
       setUserInfo(user && user.user);
       const byId = {};
@@ -71,12 +71,13 @@ export default function PromoProfile() {
                 </div>
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">Available</p>
-                  <p className="text-[#1DA1F2] text-2xl font-bold">{balance.free?.toLocaleString()}</p>
+                  <p className="text-[#1DA1F2] text-2xl font-bold">{balance.free != null ? balance.free.toLocaleString() : '—'}</p>
+                  {balanceStatus === 'error' && <button onClick={refreshBalance} className="text-xs underline text-gray-400 hover:text-white">Retry</button>}
                   <p className="text-gray-600 text-xs mt-1">Promo Credits</p>
                 </div>
                 <div className="rounded-[20px] shadow-[1px_-1px_4px_1px_#3d3c3ceb] p-5 text-center">
                   <p className="text-gray-400 text-sm mb-1">In open picks</p>
-                  <p className="text-yellow-400 text-2xl font-bold">{balance.locked?.toLocaleString()}</p>
+                  <p className="text-yellow-400 text-2xl font-bold">{balance.locked != null ? balance.locked.toLocaleString() : '—'}</p>
                   <p className="text-gray-600 text-xs mt-1">Returned or paid out at full time</p>
                 </div>
               </div>
