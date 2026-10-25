@@ -3,6 +3,18 @@
 // pending final text from counsel / the business - do not ship it as final.
 export const ACTIVE_PROMO = process.env.NEXT_PUBLIC_ACTIVE_PROMO || 'EPL';
 
+// Stock-reward numbers shown to users. The backend doesn't expose its reward config, so
+// these are copied from its defaults (Str8Upfe-be utils/rewardConfig.js:
+// REWARD_PURSE_USD, REWARD_WINNER_SHARE, REWARD_DAILY_CAP_USD) - keep them in sync if
+// those env vars are changed on the server.
+const EPL_REWARDS = { purseUsd: 1.0, winnerShare: 0.6, dailyCapUsd: 3.0 };
+const usd = (n) => `$${n.toFixed(2)}`;
+const rewardsCopy = ({ purseUsd, winnerShare, dailyCapUsd }) =>
+  `Every matched pick that settles with a winner earns a stock reward in the company you choose in The Vault. ` +
+  `The winning pick receives ${usd(purseUsd * winnerShare)} of that stock and the other pick receives ${usd(purseUsd * (1 - winnerShare))} ` +
+  `(${usd(purseUsd)} per matched pick). One rewarded pick per match, up to ${usd(dailyCapUsd)} in rewards per day. ` +
+  `Rewards are held by Str8Up on your behalf.`;
+
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://str8upgaming.com').replace(/\/$/, '');
 
 const PROMO_META = {
@@ -38,11 +50,12 @@ const PROMO_META = {
     allowDraw: true,           // three-way market: home / draw / away
     roundStyle: 'MATCHWEEK',   // rounds are MW1..MW38
     disclaimer: 'Not affiliated with, sponsored by, or endorsed by the Premier League or any club.',
-    // [PLACEHOLDER] eligibility copy pending counsel. Informational only: nothing here blocks
-    // anyone; any geoblocking has to be added separately (it is not implemented yet).
-    eligibilityNotice: '[PLACEHOLDER] The EPL Challenge is not available to residents of the United States. Eligibility requirements are set out in the Official Rules.',
-    // [PLACEHOLDER] prize / credit terms pending the Official Rules.
-    prizesNote: '[PLACEHOLDER] Prize details will be published in the Official Rules.',
+    // Informational only: nothing here blocks anyone; any geoblocking has to be added
+    // separately (it is not implemented yet).
+    eligibilityNotice: 'The EPL Challenge is not available to residents of the United States. Eligibility requirements are set out in the Official Rules.',
+    rewards: EPL_REWARDS,
+    prizesNote: rewardsCopy(EPL_REWARDS),
+    // [PLACEHOLDER] credit terms pending the Official Rules.
     creditsNote: '[PLACEHOLDER] Promo Credits have no monetary value and are non-transferable. Expiry and other terms will be set out in the Official Rules.',
   },
 };
