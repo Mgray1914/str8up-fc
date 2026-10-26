@@ -41,10 +41,20 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-package-lock.json.env.local
+.env.local
 wc-credits/artifacts/
 wc-credits/cache/
 wc-credits/node_modules/
 branch_structure.json
 temp_auto_push.bat
 temp_interactive_push.bat
+
+# secrets and signing keys: never commit
+.env*
+!.env*.example
+*.jks
+*.keystore
+keystore/
+key.properties
+*.pem
+*.key
