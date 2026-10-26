@@ -151,7 +151,6 @@ contract PromoCredit is Ownable, ReentrancyGuard {
         lockedBalance[winner] -= bet.amount;
         lockedBalance[loser]  -= bet.amount;
         balanceOf[winner]     += bet.amount * 2;
-        totalSupply           += bet.amount;
         bet.status = (winner == bet.playerA) ? BetStatus.SettledA : BetStatus.SettledB;
 
         emit BetSettled(betId, winner, loser, bet.amount);
