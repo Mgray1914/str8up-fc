@@ -1,40 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Str8Up — Web App
 
-## Getting Started
+The Next.js frontend and promo contracts for **Str8Up**, a peer-to-peer sports prediction platform on **Base**. Users connect a wallet, browse matches, make picks against other fans, and track results, the leaderboard and their stock rewards.
 
-First, run the development server:
+**Live:** https://str8upfc.com
 
+## Features
+- Wallet connect and silent wallet sign-in for promo actions
+- Match boards with three-way picks (win/draw/loss), local kickoff times, matchweek tabs and club badges
+- Take an open pick at its exact stake (equal-stake peer-to-peer matching)
+- My Picks and Profile with Won/Lost/Matched/Returned badges, plus a leaderboard
+- **The Vault:** tokenized-stock reward holdings, current value and reward history
+- Promo-only build mode (`NEXT_PUBLIC_PROMO_ONLY=true`) for campaign sites, with OG/social metadata
+- `PromoCredit` smart contract (Solidity + Hardhat, with tests): non-transferable promo credits, escrowed picks and on-chain settlement
+
+## Stack
+Next.js 15 · React 19 · Tailwind CSS · ethers v6 / web3.js · Solidity 0.8.20 · Hardhat · Base
+
+## Contracts (Base mainnet, chain ID 8453)
+| Contract | Address |
+|---|---|
+| EPL PromoCredit | [`0x36D63FECc32b66d635d66DC1372959d476494E1F`](https://basescan.org/address/0x36D63FECc32b66d635d66DC1372959d476494E1F) |
+| NFL Regular Season PromoCredit | [`0xBDA63488acBb14846056C71b20A8ed40747e47b7`](https://basescan.org/address/0xBDA63488acBb14846056C71b20A8ed40747e47b7) |
+
+## Running locally
 ```bash
+cp .env.epl.example .env.local   # fill in values; .env* files are gitignored
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Contracts:
+```bash
+cd wc-credits
+npm install
+npx hardhat test
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+The API lives in the Str8Up backend repository.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Built with
+I developed Str8Up using AI-assisted development (Claude Code).
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## History
+Netset Software built the original v1 web app in 2025. Their commits are kept in this repository's history. From mid-2026 I took over development and built the NFL, World Cup and EPL promo flows, wallet sign-in sessions, The Vault, the leaderboard and the `PromoCredit` contract.
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+— Milton Gray Jr., founder
